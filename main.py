@@ -22,9 +22,10 @@ def get_data(args):
     else:
         dataset = ConllXDataset
     data_dir = os.path.expanduser(args.data)
-    train_dataset = dataset(os.path.join(data_dir, 'train.conll'))  # TODO: remove name dependency.
-    dev_dataset = dataset(os.path.join(data_dir, 'dev.conll'))  # TODO: remove name dependency.
-    test_dataset = dataset(os.path.join(data_dir, 'test.conll'))  # TODO: remove name dependency.
+    # TODO: remove name dependency.
+    train_dataset = dataset(os.path.join(data_dir, 'train.conll'))
+    dev_dataset = dataset(os.path.join(data_dir, 'dev.conll'))
+    test_dataset = dataset(os.path.join(data_dir, 'test.conll'))
     return train_dataset, dev_dataset, test_dataset
 
 

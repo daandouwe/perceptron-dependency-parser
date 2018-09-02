@@ -11,8 +11,11 @@ Inspired by and partially based on the spaCy blog posts [Parsing English in 500 
 ### Linguistic features
 These I improvised. Probably loads of room for improvement, but an extremely basic feature set already performs remarkably well (just dep-head pairs without any context, but with a distance feature). See [features.py](features.py) for the basic feature set. For the Universal Dependencies dataset we can also make use of the `lemma` and `feats` fields, but I haven't come around to this yet.
 
+### Data handling
+All code to do handle `conllu` and `conllx` files is taken from [bastings](https://github.com/bastings/parser/tree/extended_parser) parser.
+
 ## Usage
-For now we assume you have the PTB in train/dev/test splits stored somewhere in one directory and that they are named `train.conll`, `dev.conll`, `test.conll`.
+For now we assume you have the PTB in train/dev/test splits in conll-format, stored somewhere in one directory, and that they are named `train.conll`, `dev.conll`, `test.conll`. For later I want to include a data script that downloads some of the Universal Dependencies languages, so you don't have this manual step.
 
 To train the perceptron for 5 epochs, type:
 ```bash
