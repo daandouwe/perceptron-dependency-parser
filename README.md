@@ -1,6 +1,6 @@
 # Perceptron dependency parser
 A graph-based dependency parser, trained on linguistic features with the (averaged) structured-perceptron.
-This project is an mash-up of the following sources of ingredients:
+This project is an mash-up of the following ingredients:
 
 ### Graph based dependency parsing
 Dependecy parsing with an MST algorithm from [McDonald et al. 2006](https://www.seas.upenn.edu/~strctlrn/bib/PDF/nonprojectiveHLT-EMNLP2005.pdf), and the training objective of [Dozat and Manning 2017](https://arxiv.org/pdf/1611.01734.pdf) (for each token predict a head).
