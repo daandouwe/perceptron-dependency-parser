@@ -41,9 +41,47 @@ To plot heatmaps of the predicted score matrices for five sentences in the dev s
 Making the full feature set for the training set (~11 million for the basic features) takes about 5 minutes. One epoch with these features on the training set takes around 8 minutes.
 
 ## Accuracy
-No full results yet.
+No full results yet, but training UAS after 5 epochs is around 70, and dev UAS then is around 50.
 
-Training UAS after 5 epochs is around 70. Dev UAS then is around 50.
+### Fun fact 1
+The trained weights of the features are extremely interpretable. These are the largest ones:
+```
+head dep pos=VBD . 19.0000
+head dep pos=VBZ . 18.0000
+head dep pos=VBN . 17.0000
+head dep shape=XXXXX . 17.0000
+head dep pos=VBP . 17.0000
+distance=1 16.0000
+head dep word=reached , 15.0000
+head dep pos=VBN VBP 15.0000
+head dep pos=VBD VBD 14.0000
+head dep pos=VB TO 14.0000
+distance=-1 14.0000
+head dep pos=VBN VBD 14.0000
+distance=-2 13.0000
+head dep pos=NN DT 12.0000
+head dep pos=VB . 12.0000
+head dep word=durables , 12.0000
+head dep word=Commission the 12.0000
+head dep pos=VBN MD 12.0000
+head dep pos=VBZ VBZ 12.0000
+head dep pos=ROOT VBD 12.0000
+head dep pos=ROOT VBN 12.0000
+head dep pos=VBN VB 12.0000
+head dep pos=VBP , 12.0000
+head dep pos=VBN IN 11.0000
+head dep word=disclosed . 11.0000
+head dep pos=VBG . 11.0000
+head dep pos=VBZ VBD 11.0000
+head dep pos=VBD IN 11.0000
+head dep word=Marston , 11.0000
+head dep pos=VB MD 11.0000
+```
+
+### Fun fact 2
+We can make some nifty heatmaps out of the score matrices:
+![score](image/pred0.pdf)
+![score](image/pred4.pdf)
 
 ## Requirements
 ```
