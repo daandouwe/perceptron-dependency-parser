@@ -45,8 +45,16 @@ No full results yet.
 
 Training UAS after 5 epochs is around 70. Dev UAS then is around 50.
 
+## Requirements
+```
+numpy
+matplotlib
+tqdm
+```
+
 ## TODO
 - [ ] Predict labels. Maybe a second perceptron altogether for that?
 - [ ] Make integration with Universal Dependencies easier. (Now only using conllx format)
+- [ ] Make data loading less name-dependent.
 - [ ] Understand which features matter.
 - [ ] Perform full training till convergence.
