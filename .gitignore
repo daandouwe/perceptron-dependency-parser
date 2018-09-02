@@ -1,0 +1,12 @@
+__pycache__
+__ipynb_checkpoints__
+
+models
+out
+notebooks
+
+*.conll
+*.conllu
+*.conllx
+*.pkl
+*.ipynb
