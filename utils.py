@@ -1,18 +1,6 @@
 #!/usr/bin/env python
-
 import os
 from itertools import count
-import shutil
-import numpy as np
-import torch
-from torch.autograd import Variable
-from torch.nn.init import orthogonal
-
-UNK_TOKEN = '<unk>'
-PAD_TOKEN = '<pad>'
-ROOT_TOKEN = '<root>'
-START_TOKEN = '<start>'
-END_TOKEN = '<end>'
 
 
 def get_conllx_line(tid=1, form='_', lemma='_', cpos='_', pos='_',
