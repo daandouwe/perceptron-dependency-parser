@@ -36,7 +36,7 @@ def plot(args):
     with open(args.model, 'rb') as f:
         model = pickle.load(f)
     n = 5
-    print(f'Saving plots of score matrices for {n} matrices at `image/`...')
+    print(f'Saving plots of {n} score matrices at `image/`...')
     for i, tokens in enumerate(dev_dataset.tokens[:n]):
         tree, probs =  model.parse(tokens)
         plt.imshow(probs)
@@ -69,7 +69,8 @@ def train(args):
             # in order to produce full score matrices at prediction time.
             for head in tokens:
                 for dep in tokens:
-                    features.update(get_features(head, dep, tokens, complex=args.complex_features))
+                    features.update(get_features(head, dep, tokens))
+
         dump_path = 'models/features.pkl'
         print(f'Saving features at `{dump_path}`...')
         with open(dump_path, 'wb') as f:
@@ -82,28 +83,31 @@ def train(args):
     model = Perceptron(features)
     # Train model.
     try:
-        model.train(args.epochs, train_tokens)
+        model.train(args.epochs, train_tokens, dev_set=dev_tokens)
     except KeyboardInterrupt:
         print('Exiting training early.')
 
     # Evaluate model.
+    print('Evaluating on dev set...')
     dev_acc = model.evaluate(dev_tokens)
-    print(f'| Finished training | dev UAS {dev_acc:.2f} |')
-    print()
+    print(f'Dev UAS {dev_acc:.2f} |')
+    print('Top features:')
     top_features = model.top_features(30)
     print('\n'.join(f'{f} {v:.4f}' for f, v in top_features))
     print()
 
-    # Average weights.
     model.average_weights()
 
     # Evaluate again (to see difference).
+    print('Evaluating on dev set...')
     dev_acc = model.evaluate(dev_tokens)
-    print(f'| Finished training | dev UAS {dev_acc:.2f} |')
-    print()
+    print(f'Dev UAS {dev_acc:.2f} |')
+    print('Top features:')
     top_features = model.top_features(30)
     print('\n'.join(f'{f} {v:.4f}' for f, v in top_features))
     print()
+
+    model.prune()
 
     print(f'Saving model to `{args.model}`...')
     model.save(args.model)
@@ -117,7 +121,6 @@ if __name__ == '__main__':
     parser.add_argument('--data', type=str, default='~/data/stanford-ptb')
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument('--model', type=str, default='models/model.pkl')
-    parser.add_argument('--complex-features', action='store_true')
     parser.add_argument('--features', default=None)
     parser.add_argument('--out', type=str, default='out')
     parser.add_argument('-n', '--max-lines', type=int, default=-1)
