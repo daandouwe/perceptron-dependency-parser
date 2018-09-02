@@ -9,19 +9,19 @@ Dependecy parsing with an MST algorithm from [McDonald et al. 2006](https://www.
 Inspired by and partially based on the spaCy blog posts [Parsing English in 500 Lines of Python](https://explosion.ai/blog/parsing-english-in-python) and [A Good Part-of-Speech Tagger in about 200 Lines of Python](https://explosion.ai/blog/part-of-speech-pos-tagger-in-python).
 
 ### Linguistic features
-These I improvised. Probably loads of room for improvement, but an extremely basic feature set already performs remarkably well (just dep-head pairs without any context, but with a distance feature). See [features.py](features.py) for the basic feature set. For the Universal Dependencies dataset we can also make use of the `lemma` and `feats` fields, but I haven't come around to this yet.
+The feature-set is largely taken from [McDonald et al. 2005](https://www.seas.upenn.edu/~strctlrn/bib/PDF/dependencyACL2005.pdf). For the Universal Dependencies dataset we can also make good use of the `lemma` and `feats` fields, but I haven't come around to this yet.
 
 ### Data handling
 All code to do handle `conllu` and `conllx` files is taken from [bastings](https://github.com/bastings/parser/tree/extended_parser) parser.
 
 ## Usage
-For now we assume you have the PTB in train/dev/test splits in conll-format, stored somewhere in one directory, and that they are named `train.conll`, `dev.conll`, `test.conll`. For later I want to include a data script that downloads some of the Universal Dependencies languages, so you don't have this manual step.
+For now we assume you have the PTB in train/dev/test splits in conll-format, stored somewhere in one directory, and that they are named `train.conll`, `dev.conll`, `test.conll`. For later we will to include a data script that downloads some of the Universal Dependencies languages, so we don't have this manual step.
 
 To train the perceptron for 5 epochs, type:
 ```bash
 ./main.py train --data path/to/ptb/dir --epochs 5
 ```
-The training can be halted at any point with `cntrl-c`. The trained model and feature-set are saved at `models/model.pkl` resp. `models/features.pkl` by default. To specify these paths use `--model path/to/model.pkl` resp. `--features path/to/features.pkl`.
+The training can be halted at any point with `cntrl-c`. The trained model and feature-set are saved at `models/model.pkl` resp. `models/features.pkl` by default. To specify these paths use `--model` resp. `--features`.
 
 To train the perceptron for 5 epochs with already extracted features, type:
 ```bash
