@@ -1,8 +1,6 @@
 import io
 import os
 
-from utils import PAD_TOKEN, UNK_TOKEN, ROOT_TOKEN, START_TOKEN, END_TOKEN
-
 
 def empty_conllu_example_dict():
   ex = {
