@@ -12,7 +12,6 @@ class Perceptron:
         self.weights = dict((f, 0) for f in feature_set)
         self._totals = dict((f, 0) for f in feature_set)
         self._timestamps = dict((f, 0) for f in feature_set)
-        self.complex_features = complex_features
         self.i = 0
 
     def score(self, features):
@@ -28,7 +27,7 @@ class Perceptron:
         scores = []
         features = []
         for head in tokens:
-            feats = get_features(head, token, tokens, self.complex_features)
+            feats = get_features(head, token, tokens)
             score = self.score(feats)
             features.append(feats)
             scores.append(score)
@@ -51,7 +50,7 @@ class Perceptron:
         for f in guess_features:
             upd_feat(f, -1.0)
 
-    def train(self, niters, lines):
+    def train(self, niters, lines, dev_set=None):
         for i in range(1, niters+1):
             c = 0; n = 0
             for j, line in enumerate(tqdm(lines)):
@@ -60,9 +59,12 @@ class Perceptron:
                     guess, features = self.predict(token, line)
                     self.update(features[guess], features[token.head])
                     c += guess == token.head; n += 1
-            acc = self.evaluate(lines[:20])
-            print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {acc:.2f} |')
-            # TODO: print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {acc:.2f} | Dev UAS {dev_acc:.2f}')
+            train_acc = self.evaluate(lines[:100])  # a quick approximation
+            if dev_set is not None:
+                dev_acc = self.evaluate(dev_set)
+                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {acc:.2f} | Dev UAS {dev_acc:.2f}')
+            else:
+                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {acc:.2f} |')
             np.random.shuffle(lines)
 
     def average_weights(self):
@@ -88,12 +90,19 @@ class Perceptron:
         score_matrix = np.zeros((len(tokens), len(tokens)))
         for i, dep in enumerate(tokens):
             for j, head in enumerate(tokens):
-                features = get_features(head, dep, tokens, self.complex_features)
+                features = get_features(head, dep, tokens)
                 score = self.score(features)
                 score_matrix[i][j] = score
         probs = softmax(score_matrix)
         tree = get_best_graph(probs)
         return tree, probs
+
+    def prune(self, eps=1e-3):
+        print(f'Pruning weights with threshold {eps}...')
+        zeros = sum(1 for val in self.weights.values() if val == 0.0)
+        print(f'Number of weights: {len(self.weights):,} ({zeros:,} exactly zero).')
+        self.weights = dict((f, val) for f, val in self.weights.items() if abs(val) > eps)
+        print(f'Number of pruned weights: {len(self.weights):,}.')
 
     def save(self, path):
         path = path + '.pkl' if not path.endswith('.pkl') else path
