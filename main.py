@@ -49,7 +49,9 @@ def train(args):
     dev_tokens = dev_dataset.tokens
     test_tokens = dev_dataset.tokens
 
-    #TODO: mkdir models out
+    for dir in ('models', 'out'):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
     # Obtain the feature-set.
     if args.features is not None:
