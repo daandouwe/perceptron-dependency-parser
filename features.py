@@ -12,8 +12,9 @@ END_TOKEN = XToken(
 
 def shape(word):
     """Inspired by spaCy's `token.shape` attribute."""
-    punct = (',', '.', ';', ':', '?', '!')
-    special = ('-', '/', '@', '#', '$', '%', '&')
+    punct = (',', '.', ';', ':', '?', '!', "'", '"')
+    special = ('-', '/', '', '@', '#', '$', '%', '&')
+    brackets = ('(', ')', '[', ']', '{', '}')
     shape = ''
     for char in word:
         if char.isupper():
@@ -22,6 +23,8 @@ def shape(word):
             shape += 'x'
         elif char.isdigit():
             shape += 'd'
+        elif char in brackets:
+            shape += 'b'
         elif char in punct or char in special:
             shape += char
         else:
@@ -53,6 +56,7 @@ def get_features(head, dep, line, add_surrounding=True, add_distance=True, add_i
     # Basic arc features
     features = (
         'distance=%d' % (dep.id - head.id),  # a general distance bias
+
         'head dep word word=%s %s' % (head.form, dep.form),
         'head dep pos pos=%s %s' % (head.pos, dep.pos),
 
@@ -75,16 +79,14 @@ def get_features(head, dep, line, add_surrounding=True, add_distance=True, add_i
 
     if add_surrounding:
         features += (
-            'head dep  0 +1\-1  0=%s %s\%s %s' % (head.pos, head_plus_1.pos, dep_min_1.pos, dep.pos),
-            'head dep -1  0\-1  0=%s %s\%s %s' % (head_min_1.pos, head.pos, dep_min_1.pos, dep.pos),
-            'head dep  0 +1\ 0 +1=%s %s\%s %s' % (head.pos, head_plus_1.pos, dep.pos, dep_plus_1.pos),
-            'head dep -1  0\ 0 +1=%s %s\%s %s' % (head_min_1.pos, head.pos, dep.pos, dep_plus_1.pos)
+            'head dep  0 +1/-1  0=%s %s/%s %s' % (head.pos, head_plus_1.pos, dep_min_1.pos, dep.pos),
+            'head dep -1  0/-1  0=%s %s/%s %s' % (head_min_1.pos, head.pos, dep_min_1.pos, dep.pos),
+            'head dep  0 +1/ 0 +1=%s %s/%s %s' % (head.pos, head_plus_1.pos, dep.pos, dep_plus_1.pos),
+            'head dep -1  0/ 0 +1=%s %s/%s %s' % (head_min_1.pos, head.pos, dep.pos, dep_plus_1.pos)
         )
 
     if add_inbetween:
-        betweens = line[head.id+1:dep.id]
-        if not betweens:
-            betweens = line[dep.id+1:head.id]
+        betweens = line[head.id+1:dep.id] if head.id < dep.id else line[dep.id+1:head.id]
         features += tuple(
             ('head between dep=%s %s %s (%d %d)' % (
                 head.pos, between.pos, dep.pos, between.id-head.id, dep.id-head.id)
