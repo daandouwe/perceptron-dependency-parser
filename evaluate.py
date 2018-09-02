@@ -2,6 +2,7 @@ import os
 import subprocess
 import re
 import pickle
+
 from tqdm import tqdm
 
 
@@ -57,8 +58,8 @@ def evaluate(args):
     # dev_result_path = os.path.join(args.out, f'dev.result.txt')
     # test_result_path = os.path.join(args.out, f'test.result.txt')
     data_path = os.path.expanduser(args.data)
-    dev_gold_path = os.path.join(data_path, 'dev-stanford-raw.conll')  # TODO: remove name dependency here.
-    test_gold_path = os.path.join(data_path, 'test-stanford-raw.conll')  # TODO: remove name dependency here.
+    dev_gold_path = os.path.join(data_path, 'dev.conll')  # TODO: remove name dependency here.
+    test_gold_path = os.path.join(data_path, 'test.conll')  # TODO: remove name dependency here.
     if args.ud:
         raise NotImplementedError('No UD evaluation availlable yet.')
     else:
