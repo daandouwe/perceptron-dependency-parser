@@ -39,38 +39,44 @@ To plot heatmaps of the predicted score matrices for five sentences in the dev s
 Making the full feature set for the training set (~11 million for the basic features) takes about 5 minutes. One epoch with these features on the training set takes around 8 minutes.
 
 ## Accuracy
-No full results yet, but training UAS after 5 epochs is around 70, and dev UAS then is around 50.
+No fully converged results yet, but after 6 epochs, training UAS is around 75, and dev UAS is around 71.
+(Averaging the weights has a huge impact on dev UAS: from 61 to 75!)
 
+## Interpretation
 Fun fact one: The trained weights of the features are extremely interpretable. These are the largest ones:
 ```
-head dep pos=VBD . 19.0000
-head dep pos=VBZ . 18.0000
-head dep pos=VBN . 17.0000
-head dep shape=XXXXX . 17.0000
-head dep pos=VBP . 17.0000
-distance=1 16.0000
-head dep pos=VBN VBP 15.0000
-head dep pos=VBD VBD 14.0000
-head dep pos=VB TO 14.0000
-distance=-1 14.0000
-head dep pos=VBN VBD 14.0000
-distance=-2 13.0000
-head dep pos=NN DT 12.0000
-head dep pos=VB . 12.0000
-head dep pos=VBN MD 12.0000
-head dep pos=VBZ VBZ 12.0000
-head dep pos=ROOT VBD 12.0000
-head dep pos=ROOT VBN 12.0000
-head dep pos=VBN VB 12.0000
-head dep pos=VBP , 12.0000
-head dep pos=VBN IN 11.0000
-head dep pos=VBG . 11.0000
-head dep pos=VBZ VBD 11.0000
-head dep pos=VBD IN 11.0000
-head dep pos=VB MD 11.0000
+head dep pos=VBD . 24.5849
+head dep pos=VBZ . 23.3874
+head dep pos=VBN . 20.1195
+head dep pos=VBP . 18.6637
+head dep pos=VBN MD 16.6646
+head dep word=interested in 15.2804
+head dep shape=XXXXX . 15.2345
+distance=1 15.1817
+head dep pos=VBG . 15.0368
+head dep pos=VBD VBD 14.9565
+head dep pos=VB MD 14.7098
+head dep pos=VB . 14.4930
+distance=-1 14.4745
+head dep pos=ROOT VBD 14.4062
+head dep pos=VB TO 14.2382
+head dep pos=VBN WDT 13.9254
+head dep pos=VBD , 13.7076
+head dep word=yielding , 13.5674
+head dep pos=NNS PRP$ 13.5411
+head dep shape=Xxxx.-xxxxx , 13.5285
+head dep pos=VBD WRB 13.4672
+head dep pos=VBN VBD 13.3486
+head dep pos=ROOT VBZ 13.2660
+head dep word=trading New 13.1774
+head dep word=is thing 12.9891
+head dep pos=VBZ VBZ 12.9506
+head dep word=accused of 12.8340
+head dep pos=VBD IN 12.7977
+head dep pos=VBN IN 12.7394
+head dep pos=NN PRP$ 12.6646
 ```
-
-Fun fact two: We can make some nifty heatmaps out of the score matrices: [here](image/pred0.pdf) and [here](image/pred4.pdf).
+Fun fact two: We can make some nifty [heatmaps](image) out of the score matrices.
 
 ## Requirements
 ```
@@ -85,3 +91,4 @@ tqdm
 - [ ] Make data loading less name-dependent.
 - [ ] Understand which features matter.
 - [ ] Perform full training till convergence.
+- [ ] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
