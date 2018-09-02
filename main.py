@@ -36,7 +36,7 @@ def plot(args):
     with open(args.model, 'rb') as f:
         model = pickle.load(f)
     n = 5
-    print('Saving plots of score matrices for {n} matrices at `image/`...')
+    print(f'Saving plots of score matrices for {n} matrices at `image/`...')
     for i, tokens in enumerate(dev_dataset.tokens[:n]):
         tree, probs =  model.parse(tokens)
         plt.imshow(probs)

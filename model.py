@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 from tqdm import tqdm
 
-from parser import shape, get_features
+from features import shape, get_features
 from mst import get_best_graph, softmax
 
 
