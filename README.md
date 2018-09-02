@@ -2,16 +2,14 @@
 A graph-based dependency parser, trained on linguistic features with the (averaged) structured-perceptron.
 This project is an mash-up of the following sources of ingredients:
 
-### Linguistic features
-These I improvised. Probably loads of room for improvement, but an extremely basic feature set already performs remarkably well (just dep-head pairs without any context, but with a distance feature). See [features.py](features.py) for the basic feature set.
-
-For the Universal Dependencies dataset we can also make use of the `lemma` and `feats` fields, but I haven't come around to this yet.
+### Graph based dependency parsing
+Dependecy parsing with an MST algorithm from [McDonald et al. 2006](https://www.seas.upenn.edu/~strctlrn/bib/PDF/nonprojectiveHLT-EMNLP2005.pdf), and the training objective of [Dozat and Manning 2017](https://arxiv.org/pdf/1611.01734.pdf) (for each token predict a head).
 
 ### Structured perceptron algorithm
 Inspired by and partially based on the spaCy blog posts [Parsing English in 500 Lines of Python](https://explosion.ai/blog/parsing-english-in-python) and [A Good Part-of-Speech Tagger in about 200 Lines of Python](https://explosion.ai/blog/part-of-speech-pos-tagger-in-python).
 
-### Graph based dependency parsing
-Dependecy parsing with an MST algorithm from [McDonald et al. 2006](https://www.seas.upenn.edu/~strctlrn/bib/PDF/nonprojectiveHLT-EMNLP2005.pdf), and the training objective of [Dozat and Manning 2017](https://arxiv.org/pdf/1611.01734.pdf) (for each token predict a head).
+### Linguistic features
+These I improvised. Probably loads of room for improvement, but an extremely basic feature set already performs remarkably well (just dep-head pairs without any context, but with a distance feature). See [features.py](features.py) for the basic feature set. For the Universal Dependencies dataset we can also make use of the `lemma` and `feats` fields, but I haven't come around to this yet.
 
 ## Usage
 For now we assume you have the PTB in train/dev/test splits stored somewhere in one directory and that they are named `train.conll`, `dev.conll`, `test.conll`.
