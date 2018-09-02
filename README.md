@@ -79,9 +79,7 @@ head dep pos=VB MD 11.0000
 ```
 
 ### Fun fact 2
-We can make some nifty heatmaps out of the score matrices:
-![score](image/pred0.pdf)
-![score](image/pred4.pdf)
+We can make some nifty heatmaps out of the score matrices: [here](image/pred0.pdf) and [here](image/pred4.pdf).
 
 ## Requirements
 ```
