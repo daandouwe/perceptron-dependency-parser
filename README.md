@@ -36,3 +36,17 @@ To plot heatmaps of the predicted score matrices for five sentences in the dev s
 ```bash
 ./main.py plot --data path/to/ptb/dir
 ```
+
+## Speed
+Making the full feature set for the training set (~11 million for the basic features) takes about 5 minutes. One epoch with these features on the training set takes around 8 minutes.
+
+## Accuracy
+No full results yet.
+
+Training UAS after 5 epochs is around 70. Dev UAS then is around 50.
+
+## TODO
+- [ ] Predict labels. Maybe a second perceptron altogether for that?
+- [ ] Make integration with Universal Dependencies easier. (Now only using conllx format)
+- [ ] Understand which features matter.
+- [ ] Perform full training till convergence.
