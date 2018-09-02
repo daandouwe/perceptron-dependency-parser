@@ -39,7 +39,7 @@ To plot heatmaps of the predicted score matrices for five sentences in the dev s
 ```
 
 ## Speed and size
-Making the full feature set for the training set (~11 million for the basic features) takes about 5 minutes. One epoch with these features on the training set takes around 8 minutes. Due to the sheer enormity of this tag-set, the model is quite big: ~500 MB!
+Making the full feature set for the training set (~11 million for the basic features) takes about 5 minutes. One epoch with these features on the training set takes around 8 minutes. Due to the sheer enormity of this feature-set, the model is pretty big: ~500 MB!
 
 ## Accuracy
 No fully converged results yet, but after 6 epochs, training UAS is around 75, and dev UAS is around 71.
@@ -95,3 +95,4 @@ tqdm
 - [ ] Understand which features matter.
 - [ ] Perform full training till convergence.
 - [ ] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
+- [ ] Prune the averaged weights by removing all features that are exactly 0.
