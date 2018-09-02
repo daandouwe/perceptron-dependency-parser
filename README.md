@@ -18,23 +18,23 @@ All code to do handle `conllu` and `conllx` files is taken from [bastings](https
 For now we assume you have the PTB in train/dev/test splits in conll-format, stored somewhere in one directory, and that they are named `train.conll`, `dev.conll`, `test.conll`. For later we will to include a data script that downloads some of the Universal Dependencies languages, so we don't have this manual step.
 
 To train the perceptron for 5 epochs, type:
-```bash
+```
 ./main.py train --data path/to/ptb/dir --epochs 5
 ```
 The training can be halted at any point with `cntrl-c`. The trained model and feature-set are saved at `models/model.pkl` resp. `models/features.pkl` by default. To specify these paths use `--model` resp. `--features`.
 
 To train the perceptron for 5 epochs with already extracted features, type:
-```bash
+```
 ./main.py train --data path/to/ptb/dir --epochs 5 --features path/to/features
 ```
 
 To evaluate the trained perceptron, type:
-```bash
+```
 ./main.py eval --data path/to/ptb/dir
 ```
 
 To plot heatmaps of the predicted score matrices for five sentences in the dev set (like those in [image](image)) type:
-```bash
+```
 ./main.py plot --data path/to/ptb/dir
 ```
 
@@ -83,6 +83,7 @@ Fun fact two: We can make some nifty [heatmaps](image) out of the score matrices
 
 ## Requirements
 ```
+python>=3.6.0
 numpy
 matplotlib
 tqdm
@@ -95,4 +96,4 @@ tqdm
 - [ ] Understand which features matter.
 - [ ] Perform full training till convergence.
 - [ ] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
-- [ ] Prune the averaged weights by removing all features that are exactly 0.
+- [x] Prune the averaged weights by removing all features that are exactly 0.
