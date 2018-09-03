@@ -1,4 +1,5 @@
 import pickle
+import json
 
 import numpy as np
 from tqdm import tqdm
@@ -8,11 +9,12 @@ from mst import get_best_graph, softmax
 
 
 class Perceptron:
-    def __init__(self, feature_set, complex_features=False):
-        self.weights = dict((f, 0) for f in feature_set)
-        self._totals = dict((f, 0) for f in feature_set)
-        self._timestamps = dict((f, 0) for f in feature_set)
+    def __init__(self, feature_set=None, complex_features=False):
         self.i = 0
+        if feature_set is not None:
+            self.weights = dict((f, 0) for f in feature_set)
+            self._totals = dict((f, 0) for f in feature_set)
+            self._timestamps = dict((f, 0) for f in feature_set)
 
     def score(self, features):
         all_weights = self.weights
@@ -54,7 +56,6 @@ class Perceptron:
         for i in range(1, niters+1):
             c = 0; n = 0
             for j, line in enumerate(tqdm(lines)):
-                # print(f'Line {j}/{len(lines)}', end='\r')
                 for token in line:
                     guess, features = self.predict(token, line)
                     self.update(features[guess], features[token.head])
@@ -62,9 +63,9 @@ class Perceptron:
             train_acc = self.evaluate(lines[:100])  # a quick approximation
             if dev_set is not None:
                 dev_acc = self.evaluate(dev_set)
-                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {acc:.2f} | Dev UAS {dev_acc:.2f}')
+                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {train_acc:.2f} | Dev UAS {dev_acc:.2f} |')
             else:
-                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {acc:.2f} |')
+                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {train_acc:.2f} |')
             np.random.shuffle(lines)
 
     def average_weights(self):
@@ -104,11 +105,29 @@ class Perceptron:
         self.weights = dict((f, val) for f, val in self.weights.items() if abs(val) > eps)
         print(f'Number of pruned weights: {len(self.weights):,}.')
 
-    def save(self, path):
+    def pickle(self, path):
         path = path + '.pkl' if not path.endswith('.pkl') else path
         with open(path, 'wb') as f:
             pickle.dump(self, f)
 
+    def sort(self):
+        self.weights = dict(sorted(self.weights.items(), reverse=True, key=lambda x: x[1]))
+
+    def save(self, path):
+        path = path + '.json' if not path.endswith('.json') else path
+        self.sort()
+        with open(path, 'w') as f:
+            json.dump(self.weights, f, indent=4)
+
+    def load(self, path, training=False):
+        path = path + '.json' if not path.endswith('.json') else path
+        with open(path, 'r') as f:
+            weights = json.load(f)
+        self.weights = weights
+        if training:
+            self._totals = dict((f, 0) for f in weights.keys())
+            self._timestamps = dict((f, 0) for f in weights.keys())
+
     def top_features(self, n):
-        top_weights = sorted(self.weights.items(), reverse=True, key=lambda x: x[1])
-        return top_weights[:n]
+        self.sort()
+        return list(self.weights.items())[:n]

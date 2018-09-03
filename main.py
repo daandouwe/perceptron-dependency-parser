@@ -54,14 +54,11 @@ def train(args):
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-    # Obtain the feature-set.
-    if args.features is not None:
-        # Making features can take a long time, so we optionally pickle and load them.
-        print(f'Loading feature-set from `{args.features}`...')
-        with open(args.features, 'rb') as f:
-            features = pickle.load(f)
+    if args.load:
+        print(f'Loading model from-set from `{args.model}`...')
+        model = Perceptron()
+        model.load(args.model)
     else:
-        # Otherwise, get feature-set from the training sentences.
         print('Creating feature-set...')
         features = set()
         for tokens in tqdm(train_tokens):
@@ -70,17 +67,11 @@ def train(args):
             for head in tokens:
                 for dep in tokens:
                     features.update(get_features(head, dep, tokens))
+        model = Perceptron(features)
+        del features
+    print(f'Number of features: {len(model.weights):,}.')
 
-        dump_path = 'models/features.pkl'
-        print(f'Saving features at `{dump_path}`...')
-        with open(dump_path, 'wb') as f:
-            # TODO: dump to a specific folder, maybe timestamped,
-            # not to overwrite older feature-sets.
-            pickle.dump(features, f)
-    print(f'Number of features: {len(features):,}.')
 
-    # Initialize model.
-    model = Perceptron(features)
     # Train model.
     try:
         model.train(args.epochs, train_tokens, dev_set=dev_tokens)
@@ -120,8 +111,9 @@ if __name__ == '__main__':
     parser.add_argument('mode', choices=['train', 'eval', 'plot'])
     parser.add_argument('--data', type=str, default='~/data/stanford-ptb')
     parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--model', type=str, default='models/model.pkl')
-    parser.add_argument('--features', default=None)
+    parser.add_argument('--model', type=str, default='models/model.json')
+    parser.add_argument('--load', action='store_true')
+    parser.add_argument('--simple-features', action='store_true')
     parser.add_argument('--out', type=str, default='out')
     parser.add_argument('-n', '--max-lines', type=int, default=-1)
     parser.add_argument('--ud', action='store_true')
