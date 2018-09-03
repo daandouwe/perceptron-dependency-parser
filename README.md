@@ -90,38 +90,38 @@ Test UAS 81.58
 Averaging the weights makes quite a difference on the dev-set: from 78.48 to 81.98.
 
 ## Interpretation
-Fun fact one: the trained weights of the features are extremely interpretable. These are the largest ones:
+Fun fact one: the trained weights of the features are extremely interpretable. Here are the largest ones (from the simple feature-set):
 ```
-head dep pos pos=VBN MD (-2) 32.0216
-head dep pos pos=NNS NN (-1) 28.4403
-head dep pos pos=NNS PRP$ (-2) 27.7557
-head dep pos pos=VBN PRP (-2) 27.3990
-head dep pos pos=VBN PRP (-3) 26.8825
-head dep pos word=VB did (-2) 26.3881
-head dep pos pos=VBN WDT (-2) 26.3819
-head dep pos pos=VB MD (-1) 26.3348
-head dep pos word=VBN be (-1) 26.2219
-head dep pos pos=VBN MD (-3) 25.8771
-head dep pos word=VB does (-2) 25.5444
-head dep pos word=VBN have (-1) 25.0681
-head dep pos word=VBN have (-2) 24.5689
-head dep pos word=VBN has (-3) 24.5264
-head dep pos pos=NNS CD (-1) 24.1591
-head dep pos pos=VB NNS (1) 24.0786
-head dep pos word=VBN had (-2) 23.9201
-head dep pos pos=NNS JJ (-2) 23.8582
-head dep pos pos=NNS DT (-1) 23.8089
-head dep pos pos=VBD PRP (-1) 23.7837
-head dep pos word=VB do (-2) 23.1994
-head dep pos pos=VB PRP (-1) 23.1278
-head dep pos pos=VBN VB (2) 23.0798
-head dep pos pos=$ CD (1) 22.8169
-head dep pos pos=NN NN (-1) 22.7906
-head dep word pos=Inc NNP (-2) 22.7582
-head dep pos pos=VB PRP (-2) 22.4573
-head dep word pos=Inc. NNP (-2) 22.3508
-head dep pos pos=NNS PRP$ (-1) 22.2894
-head dep pos pos=VBG PRP (-2) 22.0252
+distance=1 29.9918
+distance=-1 27.3818
+distance=-2 22.3953
+distance=2 21.1036
+distance=3 18.2438
+head dep pos pos=NN PRP$ 17.6982
+head dep pos pos=NNS PRP$ 16.0800
+head dep pos word=NN a 15.4661
+head dep pos pos=NN DT 15.3968
+distance=-3 15.1488
+head dep shape shape=XXXXX . 14.9128
+head dep pos word=NN of 14.8744
+head pos=VBN 14.7640
+head dep pos word=VBZ . 14.7317
+head dep pos pos=VBD . 14.5186
+head dep pos pos=NNS JJ 14.3879
+head pos=VBD 14.3672
+head pos=VBZ 14.0784
+head dep pos pos=VBZ . 14.0720
+distance=4 13.8039
+head dep pos pos=NN JJ 13.1833
+head dep pos pos=IN NNS 12.8427
+head dep pos word=CD than 12.7341
+head pos=VBP 12.6299
+head dep word pos=% CD 12.5798
+head dep pos pos=NNS DT 12.5320
+head dep pos word=VBP . 12.3965
+head dep pos word=VB that 12.3921
+head dep pos pos=IN NNPS 12.3371
+head dep pos word=VBD . 12.2725
 ```
 Fun fact two: We can make some nifty [heatmaps](image) out of the score matrices.
 
