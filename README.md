@@ -41,7 +41,7 @@ To plot heatmaps of the predicted score matrices for five sentences in the dev s
 ## Features
 The implementation lets you choose between a basic, and more rich feature-set.
 
-The basic features are all of the followinf form:
+The basic features are all of the following form:
 ```
 head dep pos pos=VBN VBZ
 head dep word word=is a
@@ -72,7 +72,7 @@ head between dep=DT JJ NNS (2 1)
 With `(2 1)` indicating respectively the distance from head to between, and from between to dependent.
 
 ## Speed and size
-Making the full feature set for the training set (~66 million for the basic features) takes about 14 minutes. One epoch with these features on the training set also takes around 15 minutes (40 sentences per second). After training, we prune the model by removing weights smaller than a certain threshold (1e-3 by default):
+Making the full feature set for the training set (~66 million for the basic features) takes about 14 minutes. One epoch with these features on the training set also takes around 15 minutes (~40 sentences per second). After training, we prune the model by removing weights smaller than a certain threshold (1e-3 by default):
 ```
 Pruning weights with threshold 0.001...
 Number of weights: 66,475,707 (64,130,339 exactly zero).
@@ -90,7 +90,7 @@ Test UAS 81.58
 Averaging the weights makes quite a difference on the dev-set: from 78.48 to 81.98.
 
 ## Interpretation
-Fun fact one: The trained weights of the features are extremely interpretable. These are the largest ones:
+Fun fact one: the trained weights of the features are extremely interpretable. These are the largest ones:
 ```
 head dep pos pos=VBN MD (-2) 32.0216
 head dep pos pos=NNS NN (-1) 28.4403
