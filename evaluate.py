@@ -5,6 +5,8 @@ import pickle
 
 from tqdm import tqdm
 
+from model import Perceptron
+
 
 def predict(model, lines):
     pred = []
@@ -37,8 +39,8 @@ def evaluate(args):
     _, dev_dataset, test_dataset = get_data(args)
 
     print(f'Loading model from `{args.model}`...')
-    with open(args.model, 'rb') as f:
-        model = pickle.load(f)
+    model = Perceptron()
+    model.load(args.model)
 
     print(f'Parsing dev set...')
     dev_pred = predict(model, dev_dataset.tokens)
