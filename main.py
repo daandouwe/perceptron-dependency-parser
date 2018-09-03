@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+__author__ = "Daan van Stigt"
+
+
 import argparse
 import os
 import subprocess

@@ -1,4 +1,8 @@
+__author__ = "Daan van Stigt"
+
+
 from utils import XToken
+
 
 START = '<sos>'
 END = '<eos>'

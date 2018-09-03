@@ -1,3 +1,6 @@
+__author__ = "Daan van Stigt"
+
+
 import pickle
 import json
 
