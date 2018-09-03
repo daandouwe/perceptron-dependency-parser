@@ -2,12 +2,14 @@ from utils import XToken
 
 START = '<sos>'
 END = '<eos>'
+START_POS = 'SOS'
+END_POS = 'EOS'
 
 START_TOKEN = XToken(
-    -1, START, START, START, START, START, -1, START, START, START)
+    -1, START, START_POS, START_POS, '_', '_', -1, '_', '_', '_')
 
 END_TOKEN = XToken(
-    -1, END, END, END, END, END, -1, END, END, END)
+    -1, END, END_POS, END_POS, '_', '_', -1, '_', '_', '_')
 
 
 def shape(word):
@@ -32,7 +34,7 @@ def shape(word):
     return shape
 
 
-def get_features(head, dep, line, add_surrounding=True, add_distance=True, add_inbetween=True):
+def get_features(head, dep, line, add_distance=False, add_surrounding=False, add_inbetween=False):
     """Feature-set loosely following McDonald et al. 2006."""
     def get_token(line, id):
         if id in range(len(line)):
@@ -55,8 +57,23 @@ def get_features(head, dep, line, add_surrounding=True, add_distance=True, add_i
 
     # Basic arc features
     features = (
-        'distance=%d' % (dep.id - head.id),  # a general distance bias
+        # Distance bias
+        'distance=%d' % (dep.id - head.id),
 
+        # Unigram features
+        'head word=%s' % head.form,
+        'head shape=%s' % shape(head.form),
+        'head pos=%s' % head.pos,
+        'head word pos=%s %s' % (head.form, head.pos),
+        'head shape pos=%s %s' % (shape(head.form), head.pos),
+
+        'dep word=%s' % dep.form,
+        'dep shape=%s' % shape(dep.form),
+        'dep pos=%s' % dep.pos,
+        'dep word pos=%s %s' % (dep.form, dep.pos),
+        'dep shape pos=%s %s' % (shape(dep.form), dep.pos),
+
+        # Bigram features
         'head dep word word=%s %s' % (head.form, dep.form),
         'head dep pos pos=%s %s' % (head.pos, dep.pos),
 
@@ -66,10 +83,18 @@ def get_features(head, dep, line, add_surrounding=True, add_distance=True, add_i
         'head dep first first=%s %s' % (head.form[:2], dep.form[:2]),
         'head dep final final=%s %s' % (head.form[:-2], dep.form[:-2]),
 
+        'head dep first last=%s %s' % (head.form[:2], dep.form[-2:]),
+        'head dep last first=%s %s' % (head.form[-2:], dep.form[:2]),
+
+        'head dep prefix prefix=%s %s' % (head.form[:3], dep.form[:3]),
         'head dep suffix suffix=%s %s' % (head.form[-3:], dep.form[-3:]),
-        'head dep pref pref=%s %s' % (head.form[:3], dep.form[:3]),
+
+        'head dep prefix suffix=%s %s' % (head.form[:3], dep.form[-3:]),
+        'head dep suffix prefix=%s %s' % (head.form[-3:], dep.form[:3]),
 
         'head dep shape shape=%s %s' % (shape(head.form), shape(dep.form)),
+
+        # Full position coordinates
         'head dep id id=%d %d' % (head.id, dep.id),
         )
 
@@ -79,16 +104,16 @@ def get_features(head, dep, line, add_surrounding=True, add_distance=True, add_i
 
     if add_surrounding:
         features += (
-            'head dep  0 +1/-1  0=%s %s/%s %s' % (head.pos, head_plus_1.pos, dep_min_1.pos, dep.pos),
-            'head dep -1  0/-1  0=%s %s/%s %s' % (head_min_1.pos, head.pos, dep_min_1.pos, dep.pos),
-            'head dep  0 +1/ 0 +1=%s %s/%s %s' % (head.pos, head_plus_1.pos, dep.pos, dep_plus_1.pos),
-            'head dep -1  0/ 0 +1=%s %s/%s %s' % (head_min_1.pos, head.pos, dep.pos, dep_plus_1.pos)
+            'head dep i i+1/i-1 i=%s %s/%s %s' % (head.pos, head_plus_1.pos, dep_min_1.pos, dep.pos),
+            'head dep i-1 i/i-1 i=%s %s/%s %s' % (head_min_1.pos, head.pos, dep_min_1.pos, dep.pos),
+            'head dep i i+1/i i+1=%s %s/%s %s' % (head.pos, head_plus_1.pos, dep.pos, dep_plus_1.pos),
+            'head dep i-1 i/i i+1=%s %s/%s %s' % (head_min_1.pos, head.pos, dep.pos, dep_plus_1.pos)
         )
 
     if add_inbetween:
         betweens = line[head.id+1:dep.id] if head.id < dep.id else line[dep.id+1:head.id]
         features += tuple(
             ('head between dep=%s %s %s (%d %d)' % (
-                head.pos, between.pos, dep.pos, between.id-head.id, dep.id-head.id)
+                head.pos, between.pos, dep.pos, between.id-head.id, dep.id-between.id)
                 for between in betweens))
     return features
