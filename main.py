@@ -33,8 +33,7 @@ def get_data(args):
     return train_dataset, dev_dataset, test_dataset
 
 
-def plot(args):
-    n = 5
+def plot(args, n=5):
     print(f'Loading data from `{args.data}`...')
     _, dev_dataset, _ = get_data(args)
     print(f'Loading model from `{args.model}`...')
@@ -50,6 +49,7 @@ def plot(args):
 def train(args):
     print(f'Loading dataset from `{args.data}`...')
     train_dataset, dev_dataset, test_dataset = get_data(args)
+    # With default -1 we lose the last sentence but that is OK.
     train_tokens = train_dataset.tokens[:args.max_lines]
     dev_tokens = dev_dataset.tokens
     test_tokens = dev_dataset.tokens
@@ -102,7 +102,7 @@ def train(args):
     print('\n'.join(f'{f} {v:.4f}' for f, v in top_features))
     print()
 
-    model.prune()
+    model.prune(args.eps)
 
     print(f'Saving model to `{args.model}`...')
     model.save(args.model)
@@ -116,9 +116,9 @@ if __name__ == '__main__':
     parser.add_argument('--data', type=str, default='~/data/stanford-ptb')
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument('--model', type=str, default='models/model.json')
-    parser.add_argument('--load', action='store_true')
-    parser.add_argument('--simple-features', action='store_true')
     parser.add_argument('--out', type=str, default='out')
+    parser.add_argument('--load', action='store_true')
+    parser.add_argument('--eps', type=float, default=1e-3)
     parser.add_argument('-n', '--max-lines', type=int, default=-1)
     parser.add_argument('--ud', action='store_true')
     args = parser.parse_args()
