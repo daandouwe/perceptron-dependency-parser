@@ -30,12 +30,12 @@ def get_data(args):
 
 
 def plot(args):
+    n = 5
     print(f'Loading data from `{args.data}`...')
     _, dev_dataset, _ = get_data(args)
     print(f'Loading model from `{args.model}`...')
-    with open(args.model, 'rb') as f:
-        model = pickle.load(f)
-    n = 5
+    model = Perceptron()
+    model.load(args.model)
     print(f'Saving plots of {n} score matrices at `image/`...')
     for i, tokens in enumerate(dev_dataset.tokens[:n]):
         tree, probs =  model.parse(tokens)
