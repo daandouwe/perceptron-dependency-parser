@@ -85,11 +85,11 @@ def get_features(head, dep, line, add_distance=False, add_surrounding=False, add
         'head dep word pos=%s %s' % (head.form, dep.pos),
         'head dep pos word=%s %s' % (head.pos, dep.form),
 
-        'head dep first first=%s %s' % (head.form[:2], dep.form[:2]),
-        'head dep final final=%s %s' % (head.form[:-2], dep.form[:-2]),
+        'head dep prefix prefix=%s %s' % (head.form[:2], dep.form[:2]),
+        'head dep suffix suffix=%s %s' % (head.form[:-2], dep.form[:-2]),
 
-        'head dep first last=%s %s' % (head.form[:2], dep.form[-2:]),
-        'head dep last first=%s %s' % (head.form[-2:], dep.form[:2]),
+        'head dep prefix suffix=%s %s' % (head.form[:2], dep.form[-2:]),
+        'head dep suffix prefix=%s %s' % (head.form[-2:], dep.form[:2]),
 
         'head dep prefix prefix=%s %s' % (head.form[:3], dep.form[:3]),
         'head dep suffix suffix=%s %s' % (head.form[-3:], dep.form[-3:]),
