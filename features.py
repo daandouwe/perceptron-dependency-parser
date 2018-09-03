@@ -49,20 +49,21 @@ def get_features(head, dep, line, add_distance=False, add_surrounding=False, add
             token = END_TOKEN
         return token
 
-    dep_min_1 = get_token(line, dep.id - 1)
-    head_min_1 = get_token(line, head.id - 1)
     dep_min_2 = get_token(line, dep.id - 2)
-    head_min_2 = get_token(line, head.id - 2)
-
+    dep_min_1 = get_token(line, dep.id - 1)
     dep_plus_1 = get_token(line, dep.id + 1)
-    head_plus_1 = get_token(line, head.id + 1)
     dep_plus_2 = get_token(line, dep.id + 2)
+
+    head_min_2 = get_token(line, head.id - 2)
+    head_min_1 = get_token(line, head.id - 1)
+    head_plus_1 = get_token(line, head.id + 1)
     head_plus_2 = get_token(line, head.id + 2)
 
     # Basic arc features
     features = (
-        # Distance bias
+        # Distance and position bias.
         'distance=%d' % (dep.id - head.id),
+        'head dep id id=%d %d' % (head.id, dep.id),
 
         # Unigram features
         'head word=%s' % head.form,
@@ -77,7 +78,7 @@ def get_features(head, dep, line, add_distance=False, add_surrounding=False, add
         'dep word pos=%s %s' % (dep.form, dep.pos),
         'dep shape pos=%s %s' % (shape(dep.form), dep.pos),
 
-        # Bigram features
+        # Bigram (arc) features
         'head dep word word=%s %s' % (head.form, dep.form),
         'head dep pos pos=%s %s' % (head.pos, dep.pos),
 
@@ -97,14 +98,11 @@ def get_features(head, dep, line, add_distance=False, add_surrounding=False, add
         'head dep suffix prefix=%s %s' % (head.form[-3:], dep.form[:3]),
 
         'head dep shape shape=%s %s' % (shape(head.form), shape(dep.form)),
-
-        # Full position coordinates
-        'head dep id id=%d %d' % (head.id, dep.id),
         )
 
     if add_distance:
-        # Stamp each basic features with a distance.
-        features = tuple(f + ' (%d)' % (dep.id - head.id) for f in features[1:])  # distance does not need distance stamp
+        # Stamp each of the basic features with the distance.
+        features = tuple(f + ' (%d)' % (dep.id - head.id) for f in features[2:])  # distances do not need distance stamp
 
     if add_surrounding:
         features += (
@@ -120,4 +118,5 @@ def get_features(head, dep, line, add_distance=False, add_surrounding=False, add
             ('head between dep=%s %s %s (%d %d)' % (
                 head.pos, between.pos, dep.pos, between.id-head.id, dep.id-between.id)
                 for between in betweens))
+
     return features
