@@ -38,46 +38,90 @@ To plot heatmaps of the predicted score matrices for five sentences in the dev s
 ./main.py plot --data path/to/ptb/dir
 ```
 
+## Features
+The implementation lets you choose between a basic, and more rich feature-set.
+
+The basic features are all of the followinf form:
+```
+head dep pos pos=VBN VBZ
+head dep word word=is a
+head dep pos word=VBN have
+head dep suffix suffix=ing is
+head dep shape shape=Xxxx dd/dd/ddd
+head dep shape shape=xxxx xx
+```
+With shape inspired by spaCy's `token.shape` feature. This feature-set has no positional, context or otherwise sentence-level features.
+
+Optionally you can add distance:
+```
+head dep pos pos=VBN have (-1)
+head dep word word=is a (1)
+```
+With `(-1)` indicating the linear distance from the head to the dependent. This is a cheap way of giving some sentence-level information to the model.
+
+Optionally you can add left and right surrounding pos tags for context:
+```
+head dep i i+1/i-1 i=DT NNS/VBZ VBG
+```
+with `i i+1` meaning the word itself and its right neighbor.
+
+Finally there is an 'in-between' feature that finds all tags linearly in between head and dependent:
+```
+head between dep=DT JJ NNS (2 1)
+```
+With `(2 1)` indicating respectively the distance from head to between, and from between to dependent.
+
 ## Speed and size
-Making the full feature set for the training set (~11 million for the basic features) takes about 5 minutes. One epoch with these features on the training set takes around 8 minutes. Due to the sheer enormity of this feature-set, the model is pretty big: ~500 MB!
+Making the full feature set for the training set (~66 million for the basic features) takes about 14 minutes. One epoch with these features on the training set also takes around 15 minutes (40 sentences per second). After training, we prune the model by removing weights smaller than a certain threshold (1e-3 by default):
+```
+Pruning weights with threshold 0.001...
+Number of weights: 66,475,707 (64,130,339 exactly zero).
+Number of pruned weights: 2,343,424.
+```
+Due to the sheer enormity of the feature-set, the model saved model is still pretty big: ~140 MB!
 
 ## Accuracy
-No fully converged results yet, but after 6 epochs, training UAS is around 75, and dev UAS is around 71.
-(Averaging the weights has a huge impact on dev UAS: from 61 to 75!)
+A fully converged training run (15 epochs) on the minimal feature-set gave the following results:
+```
+Train UAS 96.43
+Dev UAS 81.98
+Test UAS 81.58
+```
+Averaging the weights makes quite a difference on the dev-set: from 78.48 to 81.98.
 
 ## Interpretation
 Fun fact one: The trained weights of the features are extremely interpretable. These are the largest ones:
 ```
-head dep pos=VBD . 24.5849
-head dep pos=VBZ . 23.3874
-head dep pos=VBN . 20.1195
-head dep pos=VBP . 18.6637
-head dep pos=VBN MD 16.6646
-head dep word=interested in 15.2804
-head dep shape=XXXXX . 15.2345
-distance=1 15.1817
-head dep pos=VBG . 15.0368
-head dep pos=VBD VBD 14.9565
-head dep pos=VB MD 14.7098
-head dep pos=VB . 14.4930
-distance=-1 14.4745
-head dep pos=ROOT VBD 14.4062
-head dep pos=VB TO 14.2382
-head dep pos=VBN WDT 13.9254
-head dep pos=VBD , 13.7076
-head dep word=yielding , 13.5674
-head dep pos=NNS PRP$ 13.5411
-head dep shape=Xxxx.-xxxxx , 13.5285
-head dep pos=VBD WRB 13.4672
-head dep pos=VBN VBD 13.3486
-head dep pos=ROOT VBZ 13.2660
-head dep word=trading New 13.1774
-head dep word=is thing 12.9891
-head dep pos=VBZ VBZ 12.9506
-head dep word=accused of 12.8340
-head dep pos=VBD IN 12.7977
-head dep pos=VBN IN 12.7394
-head dep pos=NN PRP$ 12.6646
+head dep pos pos=VBN MD (-2) 32.0216
+head dep pos pos=NNS NN (-1) 28.4403
+head dep pos pos=NNS PRP$ (-2) 27.7557
+head dep pos pos=VBN PRP (-2) 27.3990
+head dep pos pos=VBN PRP (-3) 26.8825
+head dep pos word=VB did (-2) 26.3881
+head dep pos pos=VBN WDT (-2) 26.3819
+head dep pos pos=VB MD (-1) 26.3348
+head dep pos word=VBN be (-1) 26.2219
+head dep pos pos=VBN MD (-3) 25.8771
+head dep pos word=VB does (-2) 25.5444
+head dep pos word=VBN have (-1) 25.0681
+head dep pos word=VBN have (-2) 24.5689
+head dep pos word=VBN has (-3) 24.5264
+head dep pos pos=NNS CD (-1) 24.1591
+head dep pos pos=VB NNS (1) 24.0786
+head dep pos word=VBN had (-2) 23.9201
+head dep pos pos=NNS JJ (-2) 23.8582
+head dep pos pos=NNS DT (-1) 23.8089
+head dep pos pos=VBD PRP (-1) 23.7837
+head dep pos word=VB do (-2) 23.1994
+head dep pos pos=VB PRP (-1) 23.1278
+head dep pos pos=VBN VB (2) 23.0798
+head dep pos pos=$ CD (1) 22.8169
+head dep pos pos=NN NN (-1) 22.7906
+head dep word pos=Inc NNP (-2) 22.7582
+head dep pos pos=VB PRP (-2) 22.4573
+head dep word pos=Inc. NNP (-2) 22.3508
+head dep pos pos=NNS PRP$ (-1) 22.2894
+head dep pos pos=VBG PRP (-2) 22.0252
 ```
 Fun fact two: We can make some nifty [heatmaps](image) out of the score matrices.
 
@@ -94,6 +138,6 @@ tqdm
 - [ ] Make integration with Universal Dependencies easier. (Now only using conllx format)
 - [ ] Make data loading less name-dependent.
 - [ ] Understand which features matter.
-- [ ] Perform full training till convergence.
+- [X] Perform full training till convergence.
 - [ ] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
-- [x] Prune the averaged weights by removing all features that are exactly 0.
+- [X] Prune the averaged weights by removing all features that are exactly 0.
