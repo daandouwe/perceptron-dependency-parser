@@ -1,6 +1,5 @@
 __author__ = "Daan van Stigt"
 
-
 from tokens import Token, XToken
 
 
@@ -122,3 +121,15 @@ def get_features(head, dep, line, add_distance=False, add_surrounding=False, add
                 for between in betweens))
 
     return features
+
+
+def get_feature_opts(features):
+    opts = dict()
+    for opt in features:
+        if opt == 'dist':
+            opts['add_distance'] = True
+        if opt == 'surround':
+            opts['add_surrounding'] = True
+        if opt == 'between':
+            opts['add_inbetween'] = True
+    return opts
