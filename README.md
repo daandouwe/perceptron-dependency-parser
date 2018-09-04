@@ -45,12 +45,12 @@ By default the UD dataset is used. If you want to use the PTB, type:
 
 To evaluate the trained perceptron on the development and test set, type:
 ```
-./main.py eval --data data/ud --model path/to/model
+./main.py eval --model path/to/model
 ```
 
 To plot heatmaps of the predicted score matrices for five sentences in the development set (like those in [image](image)) type:
 ```
-./main.py plot --data data/ud --model path/to/model
+./main.py plot --model path/to/model
 ```
 
 ## Features
