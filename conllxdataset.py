@@ -3,11 +3,10 @@ Source: https://github.com/bastings/parser.
 Edited slightly.
 """
 
-
 import io
 import os
 
-from utils import XToken
+from tokens import XToken
 
 ROOT_TOKEN = '<root>'
 ROOT_TAG = 'ROOT'
