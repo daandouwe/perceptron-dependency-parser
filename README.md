@@ -172,4 +172,5 @@ tqdm
 - [ ] Understand which features matter.
 - [X] Perform full training till convergence.
 - [X] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
+- [ ] Enable weight-averaging for parallel training.
 - [X] Prune the averaged weights by removing all features that are exactly 0.
