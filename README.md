@@ -164,8 +164,8 @@ tqdm
 
 ## TODO
 - [ ] Predict labels. Maybe a second perceptron altogether for that?
-- [ ] Make integration with Universal Dependencies easier. (Now only using conllx format)
-- [ ] Make data loading less name-dependent.
+- [X] Make integration with Universal Dependencies easier. (Now only using conllx format)
+- [X] Make data loading less name-dependent.
 - [ ] Understand which features matter.
 - [X] Perform full training till convergence.
 - [X] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
