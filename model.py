@@ -3,36 +3,63 @@ __author__ = "Daan van Stigt"
 
 import pickle
 import json
+import multiprocessing as mp
+from ctypes import c_float
 
 import numpy as np
 from tqdm import tqdm
 
-from features import shape, get_features
+from features import get_features
 from mst import get_best_graph, softmax
+from parallel import worker, make_features_parallel
+from tokens import Token
+from utils import ceil_div
 
 
 class Perceptron:
-    def __init__(self, feature_set=None, complex_features=False):
+    def __init__(self, **kwargs):
+        self.feature_opts = kwargs
         self.i = 0
-        if feature_set is not None:
-            self.weights = dict((f, 0) for f in feature_set)
-            self._totals = dict((f, 0) for f in feature_set)
-            self._timestamps = dict((f, 0) for f in feature_set)
+
+    def initialize_weights(self, feature_set):
+        self.weights = dict((f, 0) for f in feature_set)
+        self._totals = dict((f, 0) for f in feature_set)
+        self._timestamps = dict((f, 0) for f in feature_set)
+
+    def make_features(self, lines, parallel=False):
+        """Create the feature-set from all head-dep pairs in the lines.
+
+        We need the features of _all_ possible head-dep combinations
+        in order to produce full score matrices at prediction time.
+        Note: this can take some time...
+        """
+        assert isinstance(lines, list)
+        assert all(isinstance(line, list) for line in lines)
+        assert all(isinstance(token, Token) for line in lines for token in line)
+        if not parallel:
+            features = set()
+            for tokens in tqdm(lines):
+                for head in tokens:
+                    for dep in tokens:
+                        features.update(get_features(head, dep, tokens, **self.feature_opts))
+        else:
+            features = make_features_parallel(lines)
+        self.initialize_weights(features)
+        del features
 
     def score(self, features):
-        all_weights = self.weights
         score = 0.0
         for f in features:
-            if f not in all_weights:
+            if f not in self.weights:
                 continue
-            score += all_weights[f]
+            score += self.weights[f]
         return score
 
-    def predict(self, token, tokens):
+    def predict(self, token, tokens, weights=None):
         scores = []
         features = []
         for head in tokens:
-            feats = get_features(head, token, tokens)
+            feats = get_features(head, token, tokens, **self.feature_opts)
             score = self.score(feats)
             features.append(feats)
             scores.append(score)
@@ -71,6 +98,35 @@ class Perceptron:
                 print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {train_acc:.2f} |')
             np.random.shuffle(lines)
 
+    def train_parallel(self, niters, lines, dev_set=None):
+        """Asynchronous lock-free (`Hogwild`) training of perceptron."""
+        size = mp.cpu_count()
+        chunk_size = ceil_div(len(lines), size)
+        # Make a shared array of the weights (cannot make a shared dict).
+        feature_dict = dict((f, i) for i, f in enumerate(self.weights.keys()))
+        del self.weights  # free some memory space
+        weights = mp.Array(
+            c_float,
+            np.zeros(len(feature_dict)),
+            lock=False  # Hogwild!
+        )
+        print(f'Hogwild training with {size} processes...')
+        for i in range(1, niters+1):
+            partitioned = [lines[i:i+chunk_size] for i in range(0, len(lines), chunk_size)]
+            processes = []
+            for rank in range(size):
+                p = mp.Process(
+                    target=worker,
+                    args=(partitioned[rank], rank, weights, feature_dict))
+                p.start()
+                processes.append(p)
+            for p in processes:
+                p.join()
+            np.random.shuffle(lines)
+        # Restore weights.
+        self.weights = dict((f, weights[i]) for f, i in feature_dict.items())
+        del weights, feature_dict
+
     def average_weights(self):
         print('Averaging model weights...')
         self.weights = dict((f, val/self.i) for f, val in self._totals.items())
@@ -94,7 +150,7 @@ class Perceptron:
         score_matrix = np.zeros((len(tokens), len(tokens)))
         for i, dep in enumerate(tokens):
             for j, head in enumerate(tokens):
-                features = get_features(head, dep, tokens)
+                features = get_features(head, dep, tokens, **self.feature_opts)
                 score = self.score(features)
                 score_matrix[i][j] = score
         probs = softmax(score_matrix)
@@ -108,12 +164,8 @@ class Perceptron:
         self.weights = dict((f, val) for f, val in self.weights.items() if abs(val) > eps)
         print(f'Number of pruned weights: {len(self.weights):,}.')
 
-    def pickle(self, path):
-        path = path + '.pkl' if not path.endswith('.pkl') else path
-        with open(path, 'wb') as f:
-            pickle.dump(self, f)
-
     def sort(self):
+        """Sort features by weight."""
         self.weights = dict(sorted(self.weights.items(), reverse=True, key=lambda x: x[1]))
 
     def save(self, path):

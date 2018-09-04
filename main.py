@@ -18,6 +18,7 @@ from conlludataset import ConllUDataset
 from features import get_features
 from model import Perceptron
 from evaluate import evaluate
+from utils import get_size
 
 
 def get_data(args):
@@ -58,27 +59,36 @@ def train(args):
         if not os.path.exists(dir):
             os.makedirs(dir)
 
+    # TODO: cleaner way to do this?
+    feature_opts = dict()
+    for opt in args.features:
+        if opt == 'dist':
+            feature_opts['add_distance'] = True
+        if opt == 'surround':
+            feature_opts['add_surrounding'] = True
+        if opt == 'between':
+            feature_opts['add_inbetween'] = True
+
+    # Make model.
+    model = Perceptron(**feature_opts)
     if args.load:
         print(f'Loading model from-set from `{args.model}`...')
-        model = Perceptron()
         model.load(args.model)
     else:
         print('Creating feature-set...')
-        features = set()
-        for tokens in tqdm(train_tokens):
-            # We want the features of _all_ possible head-dep combinations
-            # in order to produce full score matrices at prediction time.
-            for head in tokens:
-                for dep in tokens:
-                    features.update(get_features(head, dep, tokens))
-        model = Perceptron(features)
-        del features
+        if len(feature_opts) > 0:
+            print(f'Additional features: {", ".join(feature_opts.keys())}.')
+        model.make_features(train_tokens, parallel=args.parallel)
     print(f'Number of features: {len(model.weights):,}.')
+    print(f'Memory used by model: {get_size(model):.3f} GB.')
 
 
     # Train model.
     try:
-        model.train(args.epochs, train_tokens, dev_set=dev_tokens)
+        if args.parallel:
+            model.train_parallel(args.epochs, train_tokens, dev_set=dev_tokens)
+        else:
+            model.train(args.epochs, train_tokens, dev_set=dev_tokens)
     except KeyboardInterrupt:
         print('Exiting training early.')
 
@@ -112,15 +122,29 @@ def train(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=['train', 'eval', 'plot'])
-    parser.add_argument('--data', type=str, default='~/data/stanford-ptb')
-    parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--model', type=str, default='models/model.json')
-    parser.add_argument('--out', type=str, default='out')
-    parser.add_argument('--load', action='store_true')
-    parser.add_argument('--eps', type=float, default=1e-3)
-    parser.add_argument('-n', '--max-lines', type=int, default=-1)
-    parser.add_argument('--ud', action='store_true')
+    parser.add_argument('mode', choices=['train', 'eval', 'plot'],
+                        help='choose action')
+    parser.add_argument('--data', type=str, default='~/data/stanford-ptb',
+                        help='data dir')
+    parser.add_argument('--epochs', type=int, default=10,
+                        help='epochs to train')
+    parser.add_argument('--model', type=str, default='models/model.json',
+                        help='path to save model to, or load model from')
+    parser.add_argument('--features', nargs='+', default=[],
+                        help='space separated list of additional features',
+                        choices=['dist', 'surround', 'between'])
+    parser.add_argument('--out', type=str, default='out',
+                        help='dir to put predicted conll files')
+    parser.add_argument('--parallel', action='store_true',
+                        help='training in parallel')
+    parser.add_argument('--load', action='store_true',
+                        help='load a pretrained model, specify which with --model')
+    parser.add_argument('--eps', type=float, default=1e-3,
+                        help='prune threshold')
+    parser.add_argument('-n', '--max-lines', type=int, default=-1,
+                        help='number of lines to train on.')
+    parser.add_argument('--ud', action='store_true',
+                        help='using universal dependencies')
     args = parser.parse_args()
 
     if args.mode == 'train':
