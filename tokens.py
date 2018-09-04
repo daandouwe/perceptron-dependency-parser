@@ -57,13 +57,13 @@ class UToken(Token):
       deps: enhanced dependency graph in the form of a list of head-deprel pairs
       misc: any other annotation
     """
-    self.id = float(tid)
+    self.id = int(float(tid))  # TODO: what to do with this 8.1 business?
     self.form = form
     self.lemma = lemma
     self.upos = upos
     self.xpos = xpos
     self.feats = feats
-    self.head = head
+    self.head = int(head)
     self.deprel = deprel
     self.deps = deps
     self.misc = misc
@@ -75,6 +75,10 @@ class UToken(Token):
 
   def __repr__(self):
     return self.__str__()
+
+  @property
+  def pos(self):
+      return self.upos
 
 
 def get_conllx_line(tid=1, form='_', lemma='_', cpos='_', pos='_',

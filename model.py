@@ -31,7 +31,7 @@ class Perceptron:
 
         We need the features of _all_ possible head-dep combinations
         in order to produce full score matrices at prediction time.
-        Note: this can take some time...
+        Note: this can take some time if `lines` is long...
         """
         assert isinstance(lines, list)
         assert all(isinstance(line, list) for line in lines)
@@ -157,7 +157,7 @@ class Perceptron:
         tree = get_best_graph(probs)
         return tree, probs
 
-    def prune(self, eps=1e-3):
+    def prune(self, eps=1e-1):
         print(f'Pruning weights with threshold {eps}...')
         zeros = sum(1 for val in self.weights.values() if val == 0.0)
         print(f'Number of weights: {len(self.weights):,} ({zeros:,} exactly zero).')
@@ -180,6 +180,7 @@ class Perceptron:
             weights = json.load(f)
         self.weights = weights
         if training:
+            # If we wish to continue training we need these.
             self._totals = dict((f, 0) for f in weights.keys())
             self._timestamps = dict((f, 0) for f in weights.keys())
 

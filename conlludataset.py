@@ -7,6 +7,12 @@ Edited slightly.
 import io
 import os
 
+from tokens import UToken
+
+ROOT_TOKEN = '<root>'
+ROOT_TAG = 'ROOT'
+ROOT_LABEL = '-root-'
+
 
 def empty_conllu_example_dict():
   ex = {
@@ -20,7 +26,22 @@ def empty_conllu_example_dict():
     'deprel':  [],
     'deps':    [],
     'misc':    [],
-    'chars':   []
+  }
+  return ex
+
+
+def start_conllx_example_dict():
+  ex = {
+    'id':      [0],
+    'form':    [ROOT_TOKEN],
+    'lemma':   ['_'],
+    'pos':     [ROOT_TAG],
+    'upos':    [ROOT_TAG],
+    'feats':   ['_'],
+    'head':    [0],
+    'deprel':  [ROOT_LABEL],
+    'deps':    ['_'],
+    'misc':    ['_'],
   }
   return ex
 
@@ -35,14 +56,14 @@ def conllu_reader(f):
 
   """
 
-  ex = empty_conllu_example_dict()
+  ex = start_conllx_example_dict()
 
   for line in f:
     line = line.strip()
 
     if not line:
       yield ex
-      ex = empty_conllu_example_dict()
+      ex = start_conllx_example_dict()
       continue
 
     # comments
@@ -69,7 +90,6 @@ def conllu_reader(f):
     ex['deprel'].append(_deprel)
     ex['deps'].append(_deps)
     ex['misc'].append(_misc)
-    ex['chars'].append(list(_form))
 
   # possible last sentence without newline after
   if len(ex['form']) > 0:
@@ -90,3 +110,7 @@ class ConllUDataset:
 
     with io.open(os.path.expanduser(path), encoding="utf8") as f:
       self.examples = [d for d in conllu_reader(f)]
+
+    self.tokens = [
+            [UToken(*parts) for parts in zip(*d.values())]
+        for d in self.examples]

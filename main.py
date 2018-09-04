@@ -18,19 +18,20 @@ from conlludataset import ConllUDataset
 from features import get_features
 from model import Perceptron
 from evaluate import evaluate
-from utils import get_size
+from utils import get_size, UD_LANG, UD_SPLIT
 
 
 def get_data(args):
-    if args.ud:
-        dataset = ConllUDataset
-    else:
-        dataset = ConllXDataset
     data_dir = os.path.expanduser(args.data)
-    # TODO: remove name dependency.
-    train_dataset = dataset(os.path.join(data_dir, 'train.conll'))
-    dev_dataset = dataset(os.path.join(data_dir, 'dev.conll'))
-    test_dataset = dataset(os.path.join(data_dir, 'test.conll'))
+    if args.use_ptb:
+        train_dataset = ConllXDataset(os.path.join(data_dir, 'train.conll'))
+        dev_dataset = ConllXDataset(os.path.join(data_dir, 'dev.conll'))
+        test_dataset = ConllXDataset(os.path.join(data_dir, 'test.conll'))
+    else:
+        data_path = os.path.join(data_dir, 'ud', UD_LANG[args.lang])
+        train_dataset = ConllUDataset(data_path + UD_SPLIT['train'])
+        dev_dataset = ConllUDataset(data_path + UD_SPLIT['dev'])
+        test_dataset = ConllUDataset(data_path + UD_SPLIT['test'])
     return train_dataset, dev_dataset, test_dataset
 
 
@@ -86,6 +87,8 @@ def train(args):
     # Train model.
     try:
         if args.parallel:
+            # TODO: cannot resume after cntrl-c because
+            # self.weights is deleted and then not yet restored.
             model.train_parallel(args.epochs, train_tokens, dev_set=dev_tokens)
         else:
             model.train(args.epochs, train_tokens, dev_set=dev_tokens)
@@ -124,27 +127,32 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['train', 'eval', 'plot'],
                         help='choose action')
-    parser.add_argument('--data', type=str, default='~/data/stanford-ptb',
+    parser.add_argument('--data', type=str, default='data/',
                         help='data dir')
+    parser.add_argument('--lang', type=str, default='en',
+                        choices=['cs', 'de', 'en', 'es', 'hi', 'fr', 'nl'],  # TODO: more langs
+                        help='language (universal dependencies only)')
+    parser.add_argument('--ptb-dir', type=str, default='~/data/stanford-ptb',
+                        help='data dir for ptb')
+    parser.add_argument('--use-ptb', action='store_true',
+                        help='using penn treebank')
     parser.add_argument('--epochs', type=int, default=10,
                         help='epochs to train')
-    parser.add_argument('--model', type=str, default='models/model.json',
-                        help='path to save model to, or load model from')
     parser.add_argument('--features', nargs='+', default=[],
                         help='space separated list of additional features',
                         choices=['dist', 'surround', 'between'])
-    parser.add_argument('--out', type=str, default='out',
-                        help='dir to put predicted conll files')
     parser.add_argument('--parallel', action='store_true',
                         help='training in parallel')
+    parser.add_argument('--model', type=str, default='models/model.json',
+                        help='path to save model to, or load model from')
+    parser.add_argument('--out', type=str, default='out',
+                        help='dir to put predicted conll files')
     parser.add_argument('--load', action='store_true',
                         help='load a pretrained model, specify which with --model')
     parser.add_argument('--eps', type=float, default=1e-3,
                         help='prune threshold')
     parser.add_argument('-n', '--max-lines', type=int, default=-1,
                         help='number of lines to train on.')
-    parser.add_argument('--ud', action='store_true',
-                        help='using universal dependencies')
     args = parser.parse_args()
 
     if args.mode == 'train':
