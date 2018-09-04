@@ -5,6 +5,8 @@ models
 out
 notebooks
 
+data/ud
+
 *.conll
 *.conllu
 *.conllx

@@ -14,23 +14,39 @@ The feature-set is largely taken from [McDonald et al. 2005](https://www.seas.up
 ### Data handling
 All code to do handle `conllu` and `conllx` files is taken from [bastings](https://github.com/bastings/parser/tree/extended_parser) parser.
 
-## Usage
-For now we assume you have the PTB in train/dev/test splits in conll-format, stored somewhere in one directory, and that they are named `train.conll`, `dev.conll`, `test.conll`. For later we will to include a data script that downloads some of the Universal Dependencies languages, so we don't have this manual step.
-
-To train the perceptron for 5 epochs, type:
+## Data
+### Universal dependencies
+To obtain data from the [Universal Dependencies](http://universaldependencies.org/) project, type:
+```bash
+cd data
+./get-ud.sh
 ```
-./main.py train --data path/to/ptb/dir --epochs 5
+By default, this downloads the English-EWT dataset. The script will give you the option to download a second language from a selection of provided languages.
+
+### Penn Treebank
+You can also use the PTB. We assume you have the PTB in standard train/dev/test splits in conll-format, stored somewhere in one directory, and that they are named `train.conll`, `dev.conll`, `test.conll`.
+
+## Usage
+To train the perceptron for 5 epochs on the English UD dataset, type:
+```
+./main.py train --lang en --epochs 5
 ```
 The training can be halted at any point with `cntrl-c`. The trained weights are saved as a json file at `models/model.json` by default. To specify this path use `--model path/to/model`.
 
+By default the UD dataset is used. If you want to use the PTB, type:
+```
+./main.py train --use-ptb --ptb-dir your/ptb/dir
+
+```
+
 To evaluate the trained perceptron on the development and test set, type:
 ```
-./main.py eval --data path/to/ptb/dir --model path/to/model
+./main.py eval --data data/ud --lang en --model path/to/model
 ```
 
 To plot heatmaps of the predicted score matrices for five sentences in the development set (like those in [image](image)) type:
 ```
-./main.py plot --data path/to/ptb/dir --model path/to/model
+./main.py plot --data data/ud --lang en --model path/to/model
 ```
 
 ## Features
