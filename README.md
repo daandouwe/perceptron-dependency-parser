@@ -41,7 +41,6 @@ To use another language, e.g. Dutch, type:
 By default the UD dataset is used. If you want to use the PTB, type:
 ```
 ./main.py train --use-ptb --ptb-dir your/ptb/dir
-
 ```
 
 To evaluate the trained perceptron on the development and test set, type:
