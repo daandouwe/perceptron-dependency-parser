@@ -1,6 +1,5 @@
 __author__ = "Daan van Stigt"
 
-
 import pickle
 import json
 import multiprocessing as mp
@@ -10,14 +9,15 @@ import numpy as np
 from tqdm import tqdm
 
 from features import get_features
-from mst import get_best_graph, softmax
+from decode import Decoder
 from parallel import worker, make_features_parallel
 from tokens import Token
-from utils import ceil_div
+from utils import ceil_div, softmax
 
 
 class Perceptron:
-    def __init__(self, **kwargs):
+    def __init__(self, decoding='mst', **kwargs):
+        self.decoder = Decoder(decoding)
         self.feature_opts = kwargs
         self.i = 0
 
@@ -56,6 +56,7 @@ class Perceptron:
         return score
 
     def predict(self, token, tokens, weights=None):
+        """Gready head prediction used for training."""
         scores = []
         features = []
         for head in tokens:
@@ -71,7 +72,8 @@ class Perceptron:
             if f not in self.weights:
                 pass
             else:
-                nr_iters_at_this_weight = self.i - self._timestamps[f]  # For the times we skipped this feature.
+                 # For the number of parameter updates in which we skipped this feature.
+                nr_iters_at_this_weight = self.i - self._timestamps[f]
                 self._totals[f] += nr_iters_at_this_weight * self.weights[f]
                 self.weights[f] += v
                 self._timestamps[f] = self.i
@@ -83,6 +85,7 @@ class Perceptron:
             upd_feat(f, -1.0)
 
     def train(self, niters, lines, dev_set=None):
+        """Training by greedy head selection."""
         for i in range(1, niters+1):
             c = 0; n = 0
             for j, line in enumerate(tqdm(lines)):
@@ -91,11 +94,30 @@ class Perceptron:
                     self.update(features[guess], features[token.head])
                     c += guess == token.head; n += 1
             train_acc = self.evaluate(lines[:100])  # a quick approximation
+            message = f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {train_acc:.2f} |'
             if dev_set is not None:
-                dev_acc = self.evaluate(dev_set)
-                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {train_acc:.2f} | Dev UAS {dev_acc:.2f} |')
-            else:
-                print(f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {train_acc:.2f} |')
+                dev_acc = self.evaluate(dev_set[:100])  # a quick approximation
+                message += f' Dev UAS {dev_acc:.2f} |'
+            print(message)
+            np.random.shuffle(lines)
+
+    def train_struct(self, niters, lines, dev_set=None):
+        """Training by structured head selection using tree-decoding."""
+        for i in range(1, niters+1):
+            c = 0; n = 0
+            for j, line in enumerate(tqdm(lines)):
+                heads, _, all_features = self.parse(line)
+                for i in range(len(line)):
+                    token = line[i]
+                    guess = heads[i]
+                    self.update(all_features[i][guess], all_features[i][token.head])
+                    c += guess == token.head; n += 1
+            train_acc = self.evaluate(lines[:100])  # a quick approximation
+            message = f'| Iter {i} | Correct guess {c:,}/{n:,} | Train UAS {train_acc:.2f} |'
+            if dev_set is not None:
+                dev_acc = self.evaluate(dev_set[:100])  # a quick approximation
+                message += f' Dev UAS {dev_acc:.2f} |'
+            print(message)
             np.random.shuffle(lines)
 
     def train_parallel(self, niters, lines, dev_set=None):
@@ -132,30 +154,30 @@ class Perceptron:
         self.weights = dict((f, val/self.i) for f, val in self._totals.items())
         del self._totals, self._timestamps
 
-    def test(self, line):
-        pred, _ = self.parse(line)
-        gold = [token.head for token in line]
-        return self.accuracy(pred, gold)
-
     def accuracy(self, pred, gold):
         return 100 * sum((p == g for p, g in zip(pred, gold))) / len(pred)
 
     def evaluate(self, lines):
         acc = 0.0
         for line in lines:
-            acc += self.test(line)
+            pred, _, _ = self.parse(line)
+            gold = [token.head for token in line]
+            acc += self.accuracy(pred, gold)
         return acc / len(lines)
 
     def parse(self, tokens):
         score_matrix = np.zeros((len(tokens), len(tokens)))
+        all_features = dict()
         for i, dep in enumerate(tokens):
+            all_features[i] = dict()
             for j, head in enumerate(tokens):
                 features = get_features(head, dep, tokens, **self.feature_opts)
                 score = self.score(features)
                 score_matrix[i][j] = score
+                all_features[i][j] = features
         probs = softmax(score_matrix)
-        tree = get_best_graph(probs)
-        return tree, probs
+        heads = self.decoder(probs)
+        return heads, probs, all_features
 
     def prune(self, eps=1e-1):
         print(f'Pruning weights with threshold {eps}...')

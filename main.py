@@ -2,7 +2,6 @@
 
 __author__ = "Daan van Stigt"
 
-
 import argparse
 import os
 import subprocess
@@ -15,7 +14,7 @@ from tqdm import tqdm
 
 from conllxdataset import ConllXDataset
 from conlludataset import ConllUDataset
-from features import get_features
+from features import get_feature_opts
 from model import Perceptron
 from evaluate import evaluate
 from utils import get_size, UD_LANG, UD_SPLIT
@@ -39,11 +38,12 @@ def plot(args, n=5):
     print(f'Loading data from `{args.data}`...')
     _, dev_dataset, _ = get_data(args)
     print(f'Loading model from `{args.model}`...')
-    model = Perceptron()
+    feature_opts = get_feature_opts(args.features)
+    model = Perceptron(args.decoder, **feature_opts)
     model.load(args.model)
     print(f'Saving plots of {n} score matrices at `image/`...')
     for i, tokens in enumerate(dev_dataset.tokens[:n]):
-        tree, probs =  model.parse(tokens)
+        _, probs, _ =  model.parse(tokens)
         plt.imshow(probs)
         plt.savefig(f'image/pred{i}.pdf')
 
@@ -60,18 +60,9 @@ def train(args):
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-    # TODO: cleaner way to do this?
-    feature_opts = dict()
-    for opt in args.features:
-        if opt == 'dist':
-            feature_opts['add_distance'] = True
-        if opt == 'surround':
-            feature_opts['add_surrounding'] = True
-        if opt == 'between':
-            feature_opts['add_inbetween'] = True
-
     # Make model.
-    model = Perceptron(**feature_opts)
+    feature_opts = get_feature_opts(args.features)
+    model = Perceptron(args.decoder, **feature_opts)
     if args.load:
         print(f'Loading model from-set from `{args.model}`...')
         model.load(args.model)
@@ -90,7 +81,11 @@ def train(args):
             # TODO: cannot resume after cntrl-c because
             # self.weights is deleted and then not yet restored.
             model.train_parallel(args.epochs, train_tokens, dev_set=dev_tokens)
+        elif args.structured:
+            print(f'Training with {args.decoder} decoding...')
+            model.train_struct(args.epochs, train_tokens, dev_set=dev_tokens)
         else:
+            print('Training with greedy decoding...')
             model.train(args.epochs, train_tokens, dev_set=dev_tokens)
     except KeyboardInterrupt:
         print('Exiting training early.')
@@ -143,6 +138,11 @@ if __name__ == '__main__':
                         choices=['dist', 'surround', 'between'])
     parser.add_argument('--parallel', action='store_true',
                         help='training in parallel')
+    parser.add_argument('--structured', action='store_true',
+                        help='using decoding algorithm to train on structured objective '
+                        'specified by --decoder')
+    parser.add_argument('--decoder', choices=['mst', 'eisner'], default='mst',
+                        help='decoder used to extract tree from score matrix')
     parser.add_argument('--model', type=str, default='models/model.json',
                         help='path to save model to, or load model from')
     parser.add_argument('--out', type=str, default='out',
