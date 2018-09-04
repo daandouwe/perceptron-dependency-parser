@@ -105,8 +105,12 @@ Number of pruned weights: 2,343,424.
 Due to the sheer enormity of the feature-set, the model saved model is still pretty big: ~140 MB!
 
 ### Parallel `new`
-Both featurizing and training can now be done in parallel. To be precise: asynchronous and lock-free, also known as [Hogwild!](https://arxiv.org/pdf/1106.5730.pdf) because without locks, processors might block each other wile rewriting memory ('a herd of hogs stepping on each others trotters'). Since our optimization problem is sparse, meaning that most updates only modify a small number of the total parameters, this does not affect the quality of the learning algorithm.
+Both featurizing and training can now be done in parallel. To be precise: asynchronous and lock-free, also known as [Hogwild!](https://arxiv.org/pdf/1106.5730.pdf) because without locks, processors might block each other wile rewriting memory (like a herd of wild hogs stepping on each others trotters). Since our optimization problem is sparse, meaning that most updates only modify a small number of the total parameters, this does not affect the quality of the learning algorithm.
 
+Just add one flag:
+```
+./main.py train --parallel
+```
 By default we use all the available processors, so expect some venting.
 
 ## Accuracy
