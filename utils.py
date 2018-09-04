@@ -4,6 +4,8 @@ import pickle
 import os
 import tempfile
 
+import numpy as np
+
 
 UD_LANG = {
     'cs': os.path.join('UD_Czech-PDT', 'cs_pdt'),
@@ -37,3 +39,10 @@ def get_size(object):
     os.remove(path)
     gigabytes = bytes / 1e9
     return gigabytes
+
+
+def softmax(x):
+  """Numpy softmax function (normalizes rows)."""
+  x -= np.max(x, axis=1, keepdims=True)
+  x = np.exp(x)
+  return x / np.sum(x, axis=1, keepdims=True)
