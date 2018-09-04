@@ -29,9 +29,14 @@ You can also use the PTB. We assume you have the PTB in standard train/dev/test 
 ## Usage
 To train the perceptron for 5 epochs on the English UD dataset, type:
 ```
-./main.py train --lang en --epochs 5
+./main.py train --epochs 5
 ```
 The training can be halted at any point with `cntrl-c`. The trained weights are saved as a json file at `models/model.json` by default. To specify this path use `--model path/to/model`.
+
+To use another language, e.g. Dutch, type:
+```
+./main.py train --lang nl --epochs 5
+```
 
 By default the UD dataset is used. If you want to use the PTB, type:
 ```
@@ -41,12 +46,12 @@ By default the UD dataset is used. If you want to use the PTB, type:
 
 To evaluate the trained perceptron on the development and test set, type:
 ```
-./main.py eval --data data/ud --lang en --model path/to/model
+./main.py eval --data data/ud --model path/to/model
 ```
 
 To plot heatmaps of the predicted score matrices for five sentences in the development set (like those in [image](image)) type:
 ```
-./main.py plot --data data/ud --lang en --model path/to/model
+./main.py plot --data data/ud --model path/to/model
 ```
 
 ## Features
