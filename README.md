@@ -166,6 +166,7 @@ tqdm
 ```
 
 ## TODO
+- [ ] Make a new class `DependencyParser` and remove parsing specific methods from `Perceptron` to there.
 - [ ] Predict labels. Maybe a second perceptron altogether for that?
 - [X] Make integration with Universal Dependencies easier. (Now only using conllx format)
 - [X] Make data loading less name-dependent.
