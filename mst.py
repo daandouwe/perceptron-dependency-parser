@@ -113,13 +113,6 @@ def find_roots(edges):
   return np.where(edges[1:] == 0)[0] + 1
 
 
-def softmax(x):
-  """Numpy softmax function (normalizes rows)."""
-  x -= np.max(x, axis=1, keepdims=True)
-  x = np.exp(x)
-  return x / np.sum(x, axis=1, keepdims=True)
-
-
 def make_root(probs, root, eta=1e-9):
   """Make specified vertex (index) root and nothing else."""
   probs = np.array(probs)

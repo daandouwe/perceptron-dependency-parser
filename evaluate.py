@@ -16,7 +16,7 @@ def predict(model, lines):
     for i, line in enumerate(tqdm(lines)):
         final = i == len(lines) - 1
         pred_line = []
-        pred_heads, _ = model.parse(line)
+        pred_heads, _, _ = model.parse(line)
         for i, token in enumerate(line[1:], 1):  # Discard Root.
             token.head = pred_heads[i]
             pred_line.append(str(token))
