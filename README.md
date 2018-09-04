@@ -39,8 +39,6 @@ To plot heatmaps of the predicted score matrices for five sentences in the dev s
 ```
 
 ## Features
-The implementation lets you choose between a basic, and more rich feature-set.
-
 The basic features are all of the following form:
 ```
 head dep pos pos=VBN VBZ
@@ -70,6 +68,12 @@ Finally there is an 'in-between' feature that finds all tags linearly in between
 head between dep=DT JJ NNS (2 1)
 ```
 With `(2 1)` indicating respectively the distance from head to between, and from between to dependent.
+
+To choose these additional features for the model, type:
+```
+./main.py train --features dist surround between
+```
+(Or any combination from these three.)
 
 ## Speed and size
 Making the full feature set for the training set (~66 million for the basic features) takes about 14 minutes. One epoch with these features on the training set also takes around 15 minutes (~40 sentences per second). After training, we prune the model by removing weights smaller than a certain threshold (1e-3 by default):
