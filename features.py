@@ -1,7 +1,7 @@
 __author__ = "Daan van Stigt"
 
 
-from utils import XToken
+from tokens import Token, XToken
 
 
 START = '<sos>'
@@ -40,6 +40,8 @@ def shape(word):
 
 def get_features(head, dep, line, add_distance=False, add_surrounding=False, add_inbetween=False):
     """Feature-set loosely following McDonald et al. 2006."""
+    assert isinstance(head, Token)
+    assert isinstance(dep, Token)
     def get_token(line, id):
         if id in range(len(line)):
             token = line[id]
