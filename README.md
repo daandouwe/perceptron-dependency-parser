@@ -21,21 +21,16 @@ To train the perceptron for 5 epochs, type:
 ```
 ./main.py train --data path/to/ptb/dir --epochs 5
 ```
-The training can be halted at any point with `cntrl-c`. The trained model and feature-set are saved at `models/model.pkl` resp. `models/features.pkl` by default. To specify these paths use `--model` resp. `--features`.
+The training can be halted at any point with `cntrl-c`. The trained weights are saved as a json file at `models/model.json` by default. To specify this path use `--model path/to/model`.
 
-To train the perceptron for 5 epochs with already extracted features, type:
+To evaluate the trained perceptron on the development and test set, type:
 ```
-./main.py train --data path/to/ptb/dir --epochs 5 --features path/to/features
-```
-
-To evaluate the trained perceptron, type:
-```
-./main.py eval --data path/to/ptb/dir
+./main.py eval --data path/to/ptb/dir --model path/to/model
 ```
 
-To plot heatmaps of the predicted score matrices for five sentences in the dev set (like those in [image](image)) type:
+To plot heatmaps of the predicted score matrices for five sentences in the development set (like those in [image](image)) type:
 ```
-./main.py plot --data path/to/ptb/dir
+./main.py plot --data path/to/ptb/dir --model path/to/model
 ```
 
 ## Features
@@ -50,6 +45,7 @@ head dep shape shape=xxxx xx
 ```
 With shape inspired by spaCy's `token.shape` feature. This feature-set has no positional, context or otherwise sentence-level features.
 
+### Distance
 Optionally you can add distance:
 ```
 head dep pos pos=VBN have (-1)
@@ -57,18 +53,21 @@ head dep word word=is a (1)
 ```
 With `(-1)` indicating the linear distance from the head to the dependent. This is a cheap way of giving some sentence-level information to the model.
 
+### Surrounding
 Optionally you can add left and right surrounding pos tags for context:
 ```
 head dep i i+1/i-1 i=DT NNS/VBZ VBG
 ```
 with `i i+1` meaning the word itself and its right neighbor.
 
+### Between
 Finally there is an 'in-between' feature that finds all tags linearly in between head and dependent:
 ```
 head between dep=DT JJ NNS (2 1)
 ```
 With `(2 1)` indicating respectively the distance from head to between, and from between to dependent.
 
+### Usage
 To choose these additional features for the model, type:
 ```
 ./main.py train --features dist surround between
@@ -84,8 +83,13 @@ Number of pruned weights: 2,343,424.
 ```
 Due to the sheer enormity of the feature-set, the model saved model is still pretty big: ~140 MB!
 
+### Parallel `new`
+Both featurizing and training can now be done in parallel. To be precise: asynchronous and lock-free, also known as [Hogwild!](https://arxiv.org/pdf/1106.5730.pdf) because without locks, processors might block each other wile rewriting memory ('a herd of hogs stepping on each others trotters'). Since our optimization problem is sparse, meaning that most updates only modify a small number of the total parameters, this does not affect the quality of the learning algorithm.
+
+By default we use all the available processors, so expect some venting.
+
 ## Accuracy
-A fully converged training run (15 epochs) on the minimal feature-set gave the following results:
+A fully converged training run (15 epochs) on the basic feature set gave the following results:
 ```
 Train UAS 96.43
 Dev UAS 81.98
@@ -143,5 +147,5 @@ tqdm
 - [ ] Make data loading less name-dependent.
 - [ ] Understand which features matter.
 - [X] Perform full training till convergence.
-- [ ] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
+- [X] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
 - [X] Prune the averaged weights by removing all features that are exactly 0.
