@@ -127,7 +127,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['train', 'eval', 'plot'],
                         help='choose action')
-    parser.add_argument('--data', type=str, default='data/',
+    parser.add_argument('--data', type=str, default='data/ud',
                         help='data dir')
     parser.add_argument('--lang', type=str, default='en',
                         choices=['cs', 'de', 'en', 'es', 'hi', 'fr', 'nl'],  # TODO: more langs
