@@ -6,8 +6,13 @@ import tempfile
 
 
 UD_LANG = {
+    'cs': os.path.join('UD_Czech-PDT', 'cs_pdt'),
+    'de': os.path.join('UD_German-GSD', 'de_gsd'),
     'en': os.path.join('UD_English-EWT', 'en_ewt'),
-    'nl': os.path.join('UD_Dutch-Alpino', 'nl_alpino')
+    'es': os.path.join('UD_Spanish-GSD', 'es_gsd'),
+    'fr': os.path.join('UD_French-FTB', 'fr_ftb'),
+    'hi': os.path.join('UD_Hindi-HDTB', 'hi_hdtb'),
+    'nl': os.path.join('UD_Dutch-Alpino', 'nl_alpino'),
 }
 
 

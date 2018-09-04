@@ -9,14 +9,14 @@ from utils import ceil_div
 i = 0
 
 
-def make_features_parallel(lines):
+def make_features_parallel(lines, feature_opts):
     def worker(lines, rank, return_dict):
         features = set()
         lines = tqdm(lines) if rank == 0 else lines
         for tokens in lines:
             for head in tokens:
                 for dep in tokens:
-                    features.update(get_features(head, dep, tokens))
+                    features.update(get_features(head, dep, tokens, **feature_opts))
         return_dict[rank] = features
 
     size = mp.cpu_count()
@@ -50,11 +50,11 @@ def score_fn(features, weights, feature_dict):
     return score
 
 
-def predict(token, tokens, weights, feature_dict):
+def predict(token, tokens, weights, feature_dict, feature_opts):
     scores = []
     features = []
     for head in tokens:
-        feats = get_features(head, token, tokens)
+        feats = get_features(head, token, tokens, **feature_opts)
         score = score_fn(feats, weights, feature_dict)
         features.append(feats)
         scores.append(score)
@@ -80,12 +80,12 @@ def update(guess_features, true_features, weights, feature_dict):
         upd_feat(f, -1.0)
 
 
-def worker(train_lines, rank, weights, feature_dict, dev_lines=None):
+def worker(train_lines, rank, weights, feature_dict, feature_opts, dev_lines=None):
     train_lines = tqdm(train_lines) if rank == 0 else train_lines
     c = 0; n = 0
     for j, line in enumerate(train_lines):
         for token in line:
-            guess, features = predict(token, line, weights, feature_dict)
+            guess, features = predict(token, line, weights, feature_dict, feature_opts)
             update(features[guess], features[token.head], weights, feature_dict)
             c += guess == token.head; n += 1
     if rank == 0:

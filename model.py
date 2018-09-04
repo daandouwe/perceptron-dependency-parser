@@ -43,7 +43,7 @@ class Perceptron:
                     for dep in tokens:
                         features.update(get_features(head, dep, tokens, **self.feature_opts))
         else:
-            features = make_features_parallel(lines)
+            features = make_features_parallel(lines, self.feature_opts)
         self.initialize_weights(features)
         del features
 
@@ -117,7 +117,7 @@ class Perceptron:
             for rank in range(size):
                 p = mp.Process(
                     target=worker,
-                    args=(partitioned[rank], rank, weights, feature_dict))
+                    args=(partitioned[rank], rank, weights, feature_dict, self.feature_opts))
                 p.start()
                 processes.append(p)
             for p in processes:

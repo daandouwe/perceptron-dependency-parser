@@ -28,7 +28,7 @@ def get_data(args):
         dev_dataset = ConllXDataset(os.path.join(data_dir, 'dev.conll'))
         test_dataset = ConllXDataset(os.path.join(data_dir, 'test.conll'))
     else:
-        data_path = os.path.join(data_dir, 'ud', UD_LANG[args.lang])
+        data_path = os.path.join(data_dir, UD_LANG[args.lang])
         train_dataset = ConllUDataset(data_path + UD_SPLIT['train'])
         dev_dataset = ConllUDataset(data_path + UD_SPLIT['dev'])
         test_dataset = ConllUDataset(data_path + UD_SPLIT['test'])
