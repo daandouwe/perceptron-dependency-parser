@@ -57,7 +57,8 @@ class UToken(Token):
       deps: enhanced dependency graph in the form of a list of head-deprel pairs
       misc: any other annotation
     """
-    self.id = int(float(tid))  # TODO: what to do with this 8.1 business?
+    self.str_id = tid  # Use this for printing the conll
+    self.id = int(float(tid))  # Use this for training TODO: what is this 10.1 business?
     self.form = form
     self.lemma = lemma
     self.upos = upos
@@ -69,8 +70,8 @@ class UToken(Token):
     self.misc = misc
 
   def __str__(self):
-    return '%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (
-      self.id, self.form, self.lemma, self.upos, self.xpos, self.feats,
+    return '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (
+      self.str_id, self.form, self.lemma, self.upos, self.xpos, self.feats,
       self.head, self.deprel, self.deps, self.misc)
 
   def __repr__(self):

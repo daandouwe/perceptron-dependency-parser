@@ -1,4 +1,4 @@
-__author__ = "Daan van Stigt"
+__author__ = 'Daan van Stigt'
 
 from tokens import Token, XToken, UToken
 
@@ -44,16 +44,19 @@ def shape(word):
 
 def get_features(head, dep, line, add_distance=False, add_surrounding=False, add_inbetween=False):
     """Feature-set loosely following McDonald et al. 2006."""
-    assert isinstance(head, Token)
-    assert isinstance(dep, Token)
+    assert isinstance(line, list)
+    assert isinstance(head, Token), f'type {type(head)}'
+    assert isinstance(dep, Token), f'type {type(dep)}'
+
     def get_token(line, id):
-        type = utok if isinstance(line[0], UToken) else xtok
+        assert isinstance(id, int), f'id not and int: {id}'
+        type = 'utok' if isinstance(line[0], UToken) else 'xtok'
         if id in range(len(line)):
             token = line[id]
         elif id < 0:
-            token = START_UTOKEN if type == utok else START_XTOKEN
+            token = START_UTOKEN if type == 'utok' else START_XTOKEN
         else:
-            token = END_UTOKEN if type == utok else END_XTOKEN
+            token = END_UTOKEN if type == 'utok' else END_XTOKEN
         return token
 
     dep_min_2 = get_token(line, dep.id - 2)

@@ -30,7 +30,7 @@ def ceil_div(a, b):
 
 
 def get_size(object):
-    """Dump a pickle of object to get the size accurately."""
+    """Dump a pickle of object to accurately get the size."""
     tmp = tempfile.gettempdir()
     path = os.path.join(tmp, 'object.pkl')
     with open(path, 'wb') as f:
