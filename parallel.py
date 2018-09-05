@@ -1,12 +1,12 @@
+__author__ = 'Daan van Stigt'
+
 import multiprocessing as mp
 
 import numpy as np
 from tqdm import tqdm
 
 from features import shape, get_features
-from utils import ceil_div
-
-i = 0
+from utils import ceil_div, softmax
 
 
 def make_features_parallel(lines, feature_opts):
@@ -40,6 +40,7 @@ def make_features_parallel(lines, feature_opts):
         features.update(return_dict[rank])
     return features
 
+
 def score_fn(features, weights, feature_dict):
     score = 0.0
     for f in features:
@@ -62,6 +63,21 @@ def predict(token, tokens, weights, feature_dict, feature_opts):
     return guess, features
 
 
+def parse_parallel(tokens, weights, feature_dict, feature_opts, decoder):
+    score_matrix = np.zeros((len(tokens), len(tokens)))
+    all_features = dict()
+    for i, dep in enumerate(tokens):
+        all_features[i] = dict()
+        for j, head in enumerate(tokens):
+            features = get_features(head, dep, tokens, **feature_opts)
+            score = score_fn(features, weights, feature_dict)
+            score_matrix[i][j] = score
+            all_features[i][j] = features
+    probs = softmax(score_matrix)
+    heads = decoder(probs)
+    return heads, probs, all_features
+
+
 def update(guess_features, true_features, weights, feature_dict):
     def upd_feat(f, v):
         if f not in feature_dict:
@@ -82,17 +98,7 @@ def update(guess_features, true_features, weights, feature_dict):
 
 def worker(train_lines, rank, weights, feature_dict, feature_opts, dev_lines=None):
     train_lines = tqdm(train_lines) if rank == 0 else train_lines
-    c = 0; n = 0
     for j, line in enumerate(train_lines):
         for token in line:
             guess, features = predict(token, line, weights, feature_dict, feature_opts)
             update(features[guess], features[token.head], weights, feature_dict)
-            c += guess == token.head; n += 1
-    if rank == 0:
-        global i
-        i += 1
-        print(f'| Iter {i} | Correct guess {c:,}/{n:,} |')
-        # print('Evaluating on dev set...')
-        # if dev_lines is not None:
-            # dev_acc = self.evaluate(dev_set[:20])
-            # print(f'| Iter {i} | Train UAS {train_acc:.2f} | Dev UAS {dev_acc:.2f} |')

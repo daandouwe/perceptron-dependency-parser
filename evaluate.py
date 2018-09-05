@@ -8,7 +8,9 @@ import pickle
 from tqdm import tqdm
 
 from parser import DependencyParser
+from features import get_feature_opts
 from utils import UD_LANG, UD_SPLIT
+
 
 def predict(model, lines):
     pred = []
