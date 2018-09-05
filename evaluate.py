@@ -51,7 +51,7 @@ def evaluate(args):
 
     print(f'Loading model from `{args.model}`...')
     feature_opts = get_feature_opts(args.features)
-    model = DependencyParser(args.decoder, feature_opts)
+    model = DependencyParser(feature_opts, args.decoder)
     model.load(args.model)
 
     print(f'Parsing development set...')
