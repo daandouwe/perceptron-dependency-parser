@@ -34,7 +34,7 @@ def start_conllx_example_dict():
   ex = {
     'id':      [0],
     'form':    [ROOT_TOKEN],
-    'lemma':   ['_'],
+    'lemma':   [ROOT_TOKEN],
     'pos':     [ROOT_TAG],
     'upos':    [ROOT_TAG],
     'feats':   ['_'],
