@@ -20,6 +20,20 @@ class DependencyParser:
     def make_features(self, lines):
         self.arc_perceptron.make_features(lines)
 
+    def parse(self, tokens):
+        score_matrix = np.zeros((len(tokens), len(tokens)))
+        all_features = dict()
+        for i, dep in enumerate(tokens):
+            all_features[i] = dict()
+            for j, head in enumerate(tokens):
+                features = get_features(head, dep, tokens, **self.feature_opts)
+                score = self.arc_perceptron.score(features)
+                score_matrix[i][j] = score
+                all_features[i][j] = features
+        probs = softmax(score_matrix)
+        heads = self.decoder(probs)
+        return heads, probs, all_features
+
     def train(self, niters, train_set, dev_set, approx=100, structured=None):
         # TODO: no structured training yet.
         # Train arc perceptron first.
@@ -45,20 +59,6 @@ class DependencyParser:
             print(f'| Iter {i} | Train UAS {train_acc:.2f} | Dev UAS {dev_acc:.2f} |')
             np.random.shuffle(lines)
         self.arc_perceptron.restore_from_parallel()
-
-    def parse(self, tokens):
-        score_matrix = np.zeros((len(tokens), len(tokens)))
-        all_features = dict()
-        for i, dep in enumerate(tokens):
-            all_features[i] = dict()
-            for j, head in enumerate(tokens):
-                features = get_features(head, dep, tokens, **self.feature_opts)
-                score = self.arc_perceptron.score(features)
-                score_matrix[i][j] = score
-                all_features[i][j] = features
-        probs = softmax(score_matrix)
-        heads = self.decoder(probs)
-        return heads, probs, all_features
 
     def accuracy(self, pred, gold):
         return 100 * sum((p == g for p, g in zip(pred, gold))) / len(pred)
