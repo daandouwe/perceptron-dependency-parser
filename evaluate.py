@@ -1,6 +1,5 @@
 __author__ = 'Daan van Stigt'
 
-
 import os
 import subprocess
 import re
@@ -8,8 +7,8 @@ import pickle
 
 from tqdm import tqdm
 
-from model import Perceptron
-
+from parser import DependencyParser
+from utils import UD_LANG, UD_SPLIT
 
 def predict(model, lines):
     pred = []
@@ -26,13 +25,20 @@ def predict(model, lines):
     return pred
 
 
-def call_eval_script(gold_path, pred_path):
+def call_conllx_eval_script(gold_path, pred_path):
     s = subprocess.check_output(
         ['perl', 'scripts/eval.pl', '-g', gold_path, '-s', pred_path, '-q']
     ).decode('utf-8')
     scores = re.findall('([0-9]?[0-9]\.[0-9][0-9]) %', s)
     las, uas, lab_acc = [float(score) for score in scores]
     return las, uas, lab_acc
+
+
+def call_conllu_eval_script(gold_path, pred_path):
+    s = subprocess.check_output(
+        ['scripts/conll18_ud_eval.py', '-v', gold_path, pred_path]
+    ).decode('utf-8')
+    return s
 
 
 def evaluate(args):
@@ -42,16 +48,17 @@ def evaluate(args):
     _, dev_dataset, test_dataset = get_data(args)
 
     print(f'Loading model from `{args.model}`...')
-    model = Perceptron()
+    feature_opts = get_feature_opts(args.features)
+    model = DependencyParser(args.decoder, feature_opts)
     model.load(args.model)
 
-    print(f'Parsing dev set...')
+    print(f'Parsing development set...')
     dev_pred = predict(model, dev_dataset.tokens)
     print(f'Parsing test set...')
     test_pred = predict(model, test_dataset.tokens)
 
-    # print(f'Writing out predictions in conll format to {args.out}...')
-    ext = 'conllu' if args.ud else 'conll'
+    ext = 'conll' if args.use_ptb else 'conllu'
+    print(f'Writing out predictions in {ext} format to `{args.out}`...')
     dev_pred_path = os.path.join(args.out, f'dev.pred.{ext}')
     test_pred_path = os.path.join(args.out, f'test.pred.{ext}')
     with open(dev_pred_path, 'w') as f:
@@ -60,15 +67,46 @@ def evaluate(args):
         print('\n'.join(test_pred), file=f)
 
     print('Evaluating results...')
-    # dev_result_path = os.path.join(args.out, f'dev.result.txt')
-    # test_result_path = os.path.join(args.out, f'test.result.txt')
-    data_path = os.path.expanduser(args.data)
-    dev_gold_path = os.path.join(data_path, 'dev.conll')  # TODO: remove name dependency here.
-    test_gold_path = os.path.join(data_path, 'test.conll')  # TODO: remove name dependency here.
-    if args.ud:
-        raise NotImplementedError('No UD evaluation availlable yet.')
+    data_dir = os.path.expanduser(args.data)
+    if args.use_ptb:
+        dev_gold_path = os.path.join(data_dir, f'dev.conll')
+        test_gold_path = os.path.join(data_dir, f'test.conll')
+
+        dev_las, dev_uas, dev_lab_acc = call_conllx_eval_script(dev_gold_path, dev_pred_path)
+        test_las, test_uas, test_lab_acc = call_conllx_eval_script(test_gold_path, test_pred_path)
+
+        # TODO: formatting can be done a little cleaner than this...
+        dev_results = '\n'.join(
+            (f'{"LAS":<10} {dev_las:3.2f}', f'{"UAS":<10} {dev_uas:3.2f}', f'{"Lab-acc":<10} {dev_lab_acc:3.2f}'))
+        test_results = '\n'.join(
+            (f'{"LAS":<10} {test_las:3.2f}', f'{"UAS":<10} {test_uas:3.2f}', f'{"Lab-acc":<10} {test_lab_acc:3.2f}'))
     else:
-        las, uas, lab_acc = call_eval_script(dev_gold_path, dev_pred_path)
-        print(f'Dev LAS {las:5.2f} UAS {uas:5.2f} Lab-acc {lab_acc:5.2f}')
-        las, uas, lab_acc = call_eval_script(test_gold_path, test_pred_path)
-        print(f'Test LAS {las:5.2f} UAS {uas:5.2f} Lab-acc {lab_acc:5.2f}')
+        data_path = os.path.join(data_dir, UD_LANG[args.lang])
+        dev_gold_path = data_path + UD_SPLIT['dev']
+        test_gold_path = data_path + UD_SPLIT['test']
+
+        dev_results = call_conllu_eval_script(dev_gold_path, dev_pred_path)
+        test_results = call_conllu_eval_script(test_gold_path, test_pred_path)
+
+    # Print results to terminal.
+    print('Development results:')
+    print(dev_results)
+    print()
+    print('Test results:')
+    print(dev_results)
+    print()
+
+    # Print results to file.
+    dev_result_path = os.path.join(args.out, f'dev.{ext}.result')
+    with open(dev_result_path, 'w') as f:
+        print(f'Gold file: {dev_gold_path}', file=f)
+        print(f'Predicted file: {dev_pred_path}', file=f)
+        print(file=f)
+        print(dev_results, file=f)
+
+    test_result_path = os.path.join(args.out, f'test.{ext}.result')
+    with open(dev_result_path, 'w') as f:
+        print(f'Gold file: {dev_gold_path}', file=f)
+        print(f'Predicted file: {dev_pred_path}', file=f)
+        print(file=f)
+        print(test_results, file=f)
