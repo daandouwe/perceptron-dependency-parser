@@ -21,13 +21,19 @@ class DependencyParser:
         self.arc_perceptron.make_features(lines)
 
     def parse(self, tokens):
+        # TODO
         score_matrix = np.zeros((len(tokens), len(tokens)))
         all_features = dict()
         for i, dep in enumerate(tokens):
+        # for dep in tokens:
+            all_features[i] = dict()
             all_features[i] = dict()
             for j, head in enumerate(tokens):
+            # for head in tokens:
                 features = get_features(head, dep, tokens, **self.feature_opts)
                 score = self.arc_perceptron.score(features)
+                # score_matrix[dep.id][head.id] = score
+                # all_features[dep.id][head.id] = features
                 score_matrix[i][j] = score
                 all_features[i][j] = features
         probs = softmax(score_matrix)
