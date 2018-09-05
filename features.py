@@ -1,18 +1,23 @@
 __author__ = "Daan van Stigt"
 
-from tokens import Token, XToken
-
+from tokens import Token, XToken, UToken
 
 START = '<sos>'
 END = '<eos>'
 START_POS = 'SOS'
 END_POS = 'EOS'
 
-START_TOKEN = XToken(
+START_XTOKEN = XToken(
     -1, START, START_POS, START_POS, '_', '_', -1, '_', '_', '_')
 
-END_TOKEN = XToken(
+END_XTOKEN = XToken(
     -1, END, END_POS, END_POS, '_', '_', -1, '_', '_', '_')
+
+START_UTOKEN = UToken(
+    -1, START, START, START_POS, START_POS, '_', -1, START, '_', '_')
+
+END_UTOKEN = UToken(
+    -1, END, END, END_POS, END_POS, '_', -1, END, '_', '_')
 
 
 def shape(word):
@@ -42,12 +47,13 @@ def get_features(head, dep, line, add_distance=False, add_surrounding=False, add
     assert isinstance(head, Token)
     assert isinstance(dep, Token)
     def get_token(line, id):
+        type = utok if isinstance(line[0], UToken) else xtok
         if id in range(len(line)):
             token = line[id]
         elif id < 0:
-            token = START_TOKEN
+            token = START_UTOKEN if type == utok else START_XTOKEN
         else:
-            token = END_TOKEN
+            token = END_UTOKEN if type == utok else END_XTOKEN
         return token
 
     dep_min_2 = get_token(line, dep.id - 2)
