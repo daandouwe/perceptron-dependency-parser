@@ -77,8 +77,6 @@ def train(args):
     # Train model.
     try:
         if args.parallel:
-            # TODO: cannot resume after cntrl-c because
-            # model.weights was deleted and then not yet restored.
             model.train_parallel(args.epochs, train_tokens, dev_tokens, args.nprocs)
         else:
             objective = args.decoder if args.structured else 'greedy'
