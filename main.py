@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 __author__ = 'Daan van Stigt'
 
 import argparse
@@ -69,7 +68,7 @@ def train(args):
         print('Creating feature-set...')
         if len(feature_opts) > 0:
             print(f'Additional features: {", ".join(feature_opts.keys())}.')
-        model.make_features(train_tokens) # parallel=args.parallel)
+        model.make_features(train_tokens)
     print(f'Number of features: {len(model.weights):,}.')
     print(f'Memory used by model: {get_size(model):.3f} GB.')
 
