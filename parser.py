@@ -14,14 +14,14 @@ from utils import softmax
 class DependencyParser:
     def __init__(self, feature_opts={}, decoding='mst'):
         self.feature_opts = feature_opts
-        self.arc_perceptron = ArcPerceptron()
+        self.arc_perceptron = ArcPerceptron(self.feature_opts)
         self.decoder = Decoder(decoding)
 
     def make_features(self, lines):
         self.arc_perceptron.make_features(lines)
 
     def parse(self, tokens):
-        # TODO
+        # TODO Fix weird UD parsing! What to do with this 20.1 id business!?
         score_matrix = np.zeros((len(tokens), len(tokens)))
         all_features = dict()
         for i, dep in enumerate(tokens):
@@ -55,6 +55,7 @@ class DependencyParser:
         """Asynchronous lock-free (`Hogwild`) training of perceptron."""
         size = mp.cpu_count() if nprocs == -1 else nprocs
         print(f'Hogwild training with {size} processes...')
+        # Train arc-perceptron first.
         self.arc_perceptron.prepare_for_parallel()
         for i in range(1, niters+1):
             # Train arc perceptron for one epoch in parallel.
@@ -65,6 +66,7 @@ class DependencyParser:
             print(f'| Iter {i} | Train UAS {train_acc:.2f} | Dev UAS {dev_acc:.2f} |')
             np.random.shuffle(lines)
         self.arc_perceptron.restore_from_parallel()
+        # Train lab-perceptron second.
 
     def accuracy(self, pred, gold):
         return 100 * sum((p == g for p, g in zip(pred, gold))) / len(pred)
@@ -105,8 +107,6 @@ class DependencyParser:
     def load(self, path, training=False):
         self.arc_perceptron.load(path, training)
 
-    # --------------------------------------- #
-    # Temorpary attributes to ease transition #
     @property
     def weights(self):
         return self.arc_perceptron.weights
