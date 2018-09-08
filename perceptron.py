@@ -14,8 +14,8 @@ from tokens import Token
 from utils import ceil_div, softmax
 
 
-class BasePerceptron:
-    """Base methods for perceptron."""
+class Perceptron:
+    """Base methods for a perceptron."""
 
     def __init__(self):
         pass
@@ -67,7 +67,7 @@ class BasePerceptron:
             self._timestamps = dict((f, 0) for f in weights.keys())
 
 
-class ArcPerceptron(BasePerceptron):
+class ArcPerceptron(Perceptron):
     """Perceptron to score dependency arcs."""
 
     def __init__(self, feature_opts=dict()):
@@ -75,7 +75,23 @@ class ArcPerceptron(BasePerceptron):
         self.i = 0
 
     def make_features(self, lines, parallel=False):
-        """Create the feature-set from all head-dep pairs in the lines.
+        """Create the feature-set from gold head-dep pairs in the lines."""
+        assert isinstance(lines, list)
+        assert all(isinstance(line, list) for line in lines)
+        assert all(isinstance(token, Token) for line in lines for token in line)
+        if not parallel:
+            features = set()
+            for tokens in tqdm(lines):
+                for dep in tokens:
+                    head = tokens[dep.head]
+                    features.update(get_features(head, dep, tokens, **self.feature_opts))
+        else:
+            features = make_features_parallel(lines, self.feature_opts)
+        self.initialize_weights(features)
+        del features
+
+    def make_all_features(self, lines, parallel=False):
+        """Create the feature-set from *all* head-dep pairs in the lines.
 
         We need the features of _all_ possible head-dep combinations
         in order to produce full score matrices at prediction time.
@@ -154,11 +170,11 @@ class ArcPerceptron(BasePerceptron):
         self.weights = dict((f, self.weights[i]) for f, i in self.feature_dict.items())
         del self.feature_dict
 
-    def train_parallel(self, niters, lines, size):
-        chunk_size = ceil_div(len(lines), size)
+    def train_parallel(self, niters, lines, nprocs):
+        chunk_size = ceil_div(len(lines), nprocs)
         partitioned = [lines[i:i+chunk_size] for i in range(0, len(lines), chunk_size)]
         processes = []
-        for rank in range(size):
+        for rank in range(nprocs):
             p = mp.Process(
                 target=worker,
                 args=(partitioned[rank], rank, self.weights, self.feature_dict, self.feature_opts))
@@ -168,12 +184,12 @@ class ArcPerceptron(BasePerceptron):
             p.join()
 
 
-class LabPerceptron(BasePerceptron):
+class LabPerceptron(Perceptron):
     """Perceptron to score labels for dependency arcs."""
     pass
 
 
-#
+
 # class Perceptron:
 #     def __init__(self, decoding='mst', feature_opts={}):
 #         self.decoder = Decoder(decoding)
