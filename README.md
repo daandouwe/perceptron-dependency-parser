@@ -166,7 +166,9 @@ tqdm
 ```
 
 ## TODO
-- [ ] Parsing is *really* confusing for UD: the ones with `20.1` type word-ids, how to parse these!?
+- [ ] Decide: extract features from *all* possible head-dep pairs in training data, or only for *gold* head-dep pairs? (It makes a very large memory and speed difference)
+- [ ] When we make features from *all* possible head-dep pairs, maybe we should prune this feature-set *before* training? E.g. remove all features that occur less than 10 times?
+- [ ] Parsing is *really confusing* for UD: the ones with `20.1` type word-ids, how to parse these!?
 - [X] Make a new class `DependencyParser` and remove parsing specific methods from `Perceptron` to there.
 - [ ] Predict labels. Maybe a second perceptron altogether for that?
 - [X] Make integration with Universal Dependencies easier. (Now only using conllx format)
@@ -176,6 +178,5 @@ tqdm
 - [X] Make training parallel ('hogwild'). Really easy, and perhaps even some regularization.
 - [ ] Enable weight-averaging for parallel training.
 - [X] Prune the averaged weights by removing all features that are exactly 0.
-- [ ] Now we make features of *all* possible head-dep pairs. What if we prune this feature-set *before* training? E.g. remove all features that occur less than 10 times?
 - [ ] Evaluate model trained on *one* UD dataset, on *another* dataset (same language!), e.g. from another domain. For example:  Is the model robust against these domain changes?
 - [ ] The `eval.pl` script complains: `Use of uninitialized value in subtraction (-) at scripts/eval.pl line 954, <SYS> line 41816.` I don't like that -- it messes with my clean message logging efforts.
