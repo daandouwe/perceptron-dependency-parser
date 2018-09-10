@@ -79,7 +79,7 @@ def predict(args):
             name = f'jab-{i}'
             if args.no_tags:
                 name += '-notags'
-            plot_heatmap([token.form for token in tokens], probs, name=name, ext='pdf')
+            plot_heatmap([token.form for token in tokens], probs, name=name, ext=args.ext)
             print_prediction(tokens, heads)
     if args.examples:
         for i, line in enumerate(EXAMPLES, 1):
@@ -87,7 +87,7 @@ def predict(args):
             name = f'ex-{i}'
             if args.no_tags:
                 name += '-notags'
-            plot_heatmap([token.form for token in tokens], probs, name=name, ext='pdf')
+            plot_heatmap([token.form for token in tokens], probs, name=name, ext=args.ext)
             print_prediction(tokens, heads)
     else:
         step = 0
@@ -98,5 +98,5 @@ def predict(args):
             name = f'{args.plot_name}-{step}'
             if args.no_tags:
                 name += '-notags'
-            plot_heatmap([token.form for token in tokens], probs, name=name, ext='pdf')
+            plot_heatmap([token.form for token in tokens], probs, name=name, ext=args.ext)
             print_prediction(tokens, heads)
