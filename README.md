@@ -156,9 +156,9 @@ head dep pos pos=IN NNPS 12.3371
 head dep pos word=VBD . 12.2725
 ```
 Fun fact two: We can make some nifty heatmaps out of the score matrices:
-![jabber-1](image/jab-1-notags.png)
+![jabber-1](https://github.com/daandouwe/perceptron-dependency-parser/tree/master/image/jab-1-notags.png)
 
-![jabber-2](image/jab-2-notags.png)
+![jabber-2](https://github.com/daandouwe/perceptron-dependency-parser/tree/master/image/jab-2-notags.png)
 
 ## Requirements
 ```
