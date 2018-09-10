@@ -156,9 +156,9 @@ head dep pos pos=IN NNPS 12.3371
 head dep pos word=VBD . 12.2725
 ```
 Fun fact two: We can make some nifty heatmaps out of the score matrices:
-![jabber-1](image/jab-1-notags.pdf)
+![jabber-1](image/jab-1-notags.png)
 
-![jabber-2](image/jab-2-notags.pdf)
+![jabber-2](image/jab-2-notags.png)
 
 ## Requirements
 ```
