@@ -32,8 +32,8 @@ class DependencyParser:
             # for head in tokens:
                 features = get_features(head, dep, tokens, **self.feature_opts)
                 score = self.arc_perceptron.score(features)
-                # score_matrix[dep.id][head.id] = score
-                # all_features[dep.id][head.id] = features
+                # score_matrix[dep.id][head.id] = score  # TODO: UD parsing
+                # all_features[dep.id][head.id] = features  # TODO: UD parsing
                 score_matrix[i][j] = score
                 all_features[i][j] = features
         probs = softmax(score_matrix)
@@ -107,10 +107,9 @@ class DependencyParser:
     def load(self, path, training=False):
         self.arc_perceptron.load(path, training)
 
+    def top_features(self, n):
+        return self.arc_perceptron.top_features(n)
+
     @property
     def weights(self):
         return self.arc_perceptron.weights
-
-    @property
-    def top_features(self):
-        return self.arc_perceptron.top_features
