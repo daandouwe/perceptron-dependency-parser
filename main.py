@@ -16,6 +16,8 @@ from conlludataset import ConllUDataset
 from features import get_feature_opts
 from parser import DependencyParser
 from evaluate import evaluate
+from predict import predict
+from plot import plot
 from utils import get_size, UD_LANG, UD_SPLIT
 
 
@@ -31,20 +33,6 @@ def get_data(args):
         dev_dataset = ConllUDataset(data_path + UD_SPLIT['dev'])
         test_dataset = ConllUDataset(data_path + UD_SPLIT['test'])
     return train_dataset, dev_dataset, test_dataset
-
-
-def plot(args, n=5):
-    print(f'Loading data from `{args.data}`...')
-    _, dev_dataset, _ = get_data(args)
-    print(f'Loading model from `{args.model}`...')
-    feature_opts = get_feature_opts(args.features)
-    model = DependencyParser(feature_opts, args.decoder)
-    model.load(args.model)
-    print(f'Saving plots of {n} score matrices at `image/`...')
-    for i, tokens in enumerate(dev_dataset.tokens[:n]):
-        _, probs, _ =  model.parse(tokens)
-        plt.imshow(probs)
-        plt.savefig(f'image/pred{i}.pdf')
 
 
 def train(args):
@@ -127,8 +115,10 @@ def train(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=['train', 'eval', 'plot'],
+    parser.add_argument('mode', choices=['train', 'eval', 'plot', 'predict'],
                         help='choose action')
+
+    # Data args.
     parser.add_argument('--data', type=str, default='data/ud',
                         help='data dir')
     parser.add_argument('--lang', type=str, default='en',
@@ -138,6 +128,19 @@ if __name__ == '__main__':
                         help='data dir for ptb')
     parser.add_argument('--use-ptb', action='store_true',
                         help='using penn treebank')
+
+    # Model args.
+    parser.add_argument('--decoder', choices=['mst', 'eisner'], default='mst',
+                        help='decoder used to extract tree from score matrix')
+    parser.add_argument('--model', type=str, default='models/model.json',
+                        help='path to save model to, or load model from')
+    parser.add_argument('--eps', type=float, default=1e-2,
+                        help='prune threshold for feature weights')
+    parser.add_argument('--load', action='store_true',
+                        help='load a pretrained model, specify which with --model')
+
+
+    # Training args.
     parser.add_argument('--epochs', type=int, default=10,
                         help='epochs to train')
     parser.add_argument('--features', nargs='+', default=[],
@@ -150,23 +153,29 @@ if __name__ == '__main__':
     parser.add_argument('--structured', action='store_true',
                         help='using decoding algorithm to train on structured objective '
                         'specified by --decoder')
-    parser.add_argument('--decoder', choices=['mst', 'eisner'], default='mst',
-                        help='decoder used to extract tree from score matrix')
-    parser.add_argument('--model', type=str, default='models/model.json',
-                        help='path to save model to, or load model from')
     parser.add_argument('--out', type=str, default='out',
                         help='dir to put predicted conll files')
-    parser.add_argument('--load', action='store_true',
-                        help='load a pretrained model, specify which with --model')
-    parser.add_argument('--eps', type=float, default=1e-2,
-                        help='prune threshold')
     parser.add_argument('-n', '--max-lines', type=int, default=-1,
                         help='number of lines to train on.')
+
+    # Predict args.
+    parser.add_argument('--examples', action='store_true',
+                        help='parse some example lines that should be pretty hard')
+    parser.add_argument('--jabber', action='store_true',
+                        help='parse some lines from the jabberwocky poem')
+    parser.add_argument('--no-tags', action='store_true',
+                        help='parse with no tags')
+    parser.add_argument('--plot-name', default='input',
+                        help='name for the heatmap plot')
+    parser.add_argument('--ext', default='pdf')
+
     args = parser.parse_args()
 
     if args.mode == 'train':
         train(args)
     if args.mode == 'eval':
         evaluate(args)
+    if args.mode == 'predict':
+        predict(args)
     if args.mode == 'plot':
         plot(args)
