@@ -3,7 +3,6 @@ Source: https://github.com/bastings/parser.
 Edited slightly.
 """
 
-
 import io
 import os
 

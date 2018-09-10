@@ -4,7 +4,6 @@ Source: https://github.com/bastings/parser.
 Edited slightly.
 """
 
-
 import os
 from itertools import count
 
