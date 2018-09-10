@@ -25,6 +25,7 @@ JABBERWOCKY = [
     'So rested he by the Tumtum tree and stood awhile in thought.',
 ]
 
+
 EXAMPLES = [
     'One morning I shot an elephant in my pajamas.',
     'Time flies like an arrow; fruit flies like a banana.',
@@ -46,7 +47,6 @@ def make_conll_tokens(tokens, tags):
     return conll_tokens
 
 
-
 def print_prediction(tokens, heads):
     for i, h in enumerate(heads[1:], 1):
         print(tokens[i].form + ' <-- ' + tokens[h].form)
@@ -61,6 +61,7 @@ def predict(args):
     feature_opts = get_feature_opts(args.features)
     model = DependencyParser(feature_opts, args.decoder)
     model.load(args.model)
+    print(f'Model UAS: {model.arc_accuracy["dev"]:.2f}')
 
     def predict_input(line):
         tokens = tokenizer(line)

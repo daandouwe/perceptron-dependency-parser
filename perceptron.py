@@ -48,23 +48,31 @@ class Perceptron:
         self.sort()
         return list(self.weights.items())[:n]
 
-    def save(self, path):
+    def save(self, path, accuracy=None):
         """Save model features and weights in json format."""
         path = path + '.json' if not path.endswith('.json') else path
         self.sort()
+        model = {
+            'accuracy': accuracy,
+            'feature_opts': self.feature_opts,
+            'weights': self.weights
+        }
         with open(path, 'w') as f:
-            json.dump(self.weights, f, indent=4)
+            json.dump(model, f, indent=4)
 
     def load(self, path, training=False):
         """Load model features and weights from json format."""
         path = path + '.json' if not path.endswith('.json') else path
         with open(path, 'r') as f:
-            weights = json.load(f)
+            model = json.load(f)
+        weights, feature_opts, accuracy = model['weights'], model['feature_opts'], model['accuracy']
         self.weights = weights
+        self.feature_opts = feature_opts
         if training:
             # If we wish to continue training we will need these.
             self._totals = dict((f, 0) for f in weights.keys())
             self._timestamps = dict((f, 0) for f in weights.keys())
+        return accuracy, feature_opts
 
 
 class ArcPerceptron(Perceptron):

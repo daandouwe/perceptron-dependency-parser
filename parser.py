@@ -16,6 +16,7 @@ class DependencyParser:
         self.feature_opts = feature_opts
         self.arc_perceptron = ArcPerceptron(self.feature_opts)
         self.decoder = Decoder(decoding)
+        self.arc_accuracy = None
 
     def make_features(self, lines):
         self.arc_perceptron.make_features(lines)
@@ -101,11 +102,13 @@ class DependencyParser:
     def prune(self, eps):
         return self.arc_perceptron.prune(eps)
 
-    def save(self, path):
-        self.arc_perceptron.save(path)
+    def save(self, path, accuracy):
+        self.arc_accuracy = round(accuracy, 2)
+        self.arc_perceptron.save(path, accuracy=self.arc_accuracy)
 
     def load(self, path, training=False):
-        self.arc_perceptron.load(path, training)
+        accuracy, feature_opts = self.arc_perceptron.load(path, training)
+        self.arc_accuracy, self.feature_opts = accuracy, feature_opts
 
     def top_features(self, n):
         return self.arc_perceptron.top_features(n)

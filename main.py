@@ -60,7 +60,6 @@ def train(args):
     print(f'Number of features: {len(model.weights):,}.')
     print(f'Memory used by model: {get_size(model):.3f} GB.')
 
-
     # Train model.
     try:
         if args.parallel:
@@ -104,7 +103,7 @@ def train(args):
     print(f'Number of pruned weights: {len(model.weights):,}.')
 
     print(f'Saving model to `{args.model}`...')
-    model.save(args.model)
+    model.save(args.model, accuracy=dict(dev=dev_acc))
 
     print()
     print('Producing predictions in conll format and final evaluation...')
