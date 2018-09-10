@@ -8,10 +8,10 @@ START_POS = 'SOS'
 END_POS = 'EOS'
 
 START_XTOKEN = XToken(
-    -1, START, START_POS, START_POS, '_', '_', -1, '_', '_', '_')
+    -1, START, START, START_POS, START_POS, '_', -1, '_', '_', '_')
 
 END_XTOKEN = XToken(
-    -1, END, END_POS, END_POS, '_', '_', -1, '_', '_', '_')
+    -1, END, END, END_POS, END_POS, '_', -1, '_', '_', '_')
 
 START_UTOKEN = UToken(
     -1, START, START, START_POS, START_POS, '_', -1, START, '_', '_')
