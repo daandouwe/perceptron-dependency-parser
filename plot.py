@@ -33,7 +33,7 @@ def plot_heatmap(tokens, probs, dir='image', name='input', ext='pdf'):
     name += '.' + ext
     path = os.path.join(dir, name)
     if ext == 'png':
-        plt.savefig(path, dpi=300)
+        plt.savefig(path, dpi=200)
     else:
         plt.savefig(path)
 
