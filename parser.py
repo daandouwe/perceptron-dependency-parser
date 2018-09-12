@@ -103,7 +103,7 @@ class DependencyParser:
         return self.arc_perceptron.prune(eps)
 
     def save(self, path, accuracy):
-        self.arc_accuracy = round(accuracy, 2)
+        self.arc_accuracy = accuracy
         self.arc_perceptron.save(path, accuracy=self.arc_accuracy)
 
     def load(self, path, training=False):

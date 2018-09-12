@@ -103,7 +103,7 @@ def train(args):
     print(f'Number of pruned weights: {len(model.weights):,}.')
 
     print(f'Saving model to `{args.model}`...')
-    model.save(args.model, accuracy=dict(dev=dev_acc))
+    model.save(args.model, accuracy=dict(dev=round(dev_acc, 2)))
 
     print()
     print('Producing predictions in conll format and final evaluation...')
