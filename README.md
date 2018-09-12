@@ -113,13 +113,11 @@ Number of pruned weights: 2,343,424.
 Due to the sheer enormity of the feature-set, the model saved model is still pretty big: ~140 MB!
 
 ## Accuracy
-A fully converged training run (15 epochs) on the basic feature set gave the following results:
+On the PTB we can get the following results:
+```bash
+./main.py train --use-ptb --epochs 3 --features dist surround   # Train UAS 94.97, dev UAS 89.55
 ```
-Train UAS 96.43
-Dev UAS 81.98
-Test UAS 81.58
-```
-Averaging the weights makes quite a difference on the dev-set: from 78.48 to 81.98.
+Averaging the weights makes quite a difference on the dev-set: from 86.87 to 89.55. More epochs will also help.
 
 ## Interpretation
 Fun fact one: the trained weights of the features are extremely interpretable. Here are the largest ones (from the simple feature-set):
