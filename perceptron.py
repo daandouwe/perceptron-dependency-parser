@@ -54,9 +54,8 @@ class Perceptron:
         self.sort()
         model = {
             'accuracy': accuracy,
-            'feature_opts': self.feature_opts,
-            'weights': self.weights
-        }
+            'feature-opts': self.feature_opts,
+            'weights': self.weights}
         with open(path, 'w') as f:
             json.dump(model, f, indent=4)
 
@@ -65,7 +64,7 @@ class Perceptron:
         path = path + '.json' if not path.endswith('.json') else path
         with open(path, 'r') as f:
             model = json.load(f)
-        weights, feature_opts, accuracy = model['weights'], model['feature_opts'], model['accuracy']
+        weights, feature_opts, accuracy = model['weights'], model['feature-opts'], model['accuracy']
         self.weights = weights
         self.feature_opts = feature_opts
         if training:
@@ -174,7 +173,6 @@ class ArcPerceptron(Perceptron):
 
     def restore_from_parallel(self):
         """Restore weights dictionary from shared memory after parallel training."""
-        # Restore weights.
         self.weights = dict((f, self.weights[i]) for f, i in self.feature_dict.items())
         del self.feature_dict
 
