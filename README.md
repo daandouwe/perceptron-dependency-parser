@@ -115,7 +115,7 @@ Due to the sheer enormity of the feature-set, the model saved model is still pre
 ## Accuracy
 On the PTB we can get the following results:
 ```bash
-./main.py train --use-ptb --epochs 3 --features dist surround   # Train UAS 94.97, dev UAS 89.55
+./main.py train --use-ptb --epochs 3 --features dist surround between   # Train UAS 94.97, dev UAS 89.55
 ```
 Averaging the weights makes quite a difference on the dev-set: from 86.87 to 89.55. More epochs will also help.
 
