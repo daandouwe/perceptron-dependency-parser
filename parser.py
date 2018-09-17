@@ -102,13 +102,13 @@ class DependencyParser:
     def prune(self, eps):
         return self.arc_perceptron.prune(eps)
 
-    def save(self, path, data=None, epochs=None, accuracy=None):
-        assert isinstance(data, str), data
-        assert isinstance(epochs, int), epochs
+    def save(self, path, data_path=None, epochs_trained=None, accuracy=None):
+        assert isinstance(data_path, str), data_path
+        assert isinstance(epochs_trained, int), epochs
         assert isinstance(accuracy, dict), accuracy
         self.arc_accuracy = accuracy
         self.arc_perceptron.save(
-            path, data=data, epochs=epochs, accuracy=self.arc_accuracy)
+            path, data_path=data_path, epochs_trained=epochs_trained, accuracy=self.arc_accuracy)
 
     def load(self, path, training=False):
         accuracy, feature_opts = self.arc_perceptron.load(path, training)
