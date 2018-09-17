@@ -119,6 +119,14 @@ On the PTB we can get the following results:
 ```
 Averaging the weights makes quite a difference on the dev-set: from 86.87 to 89.55. More epochs will also help.
 
+### Decoding: minimum spanning tree vs Eisner
+Let's see the difference in accuracy between Eisner's algorithm and the maximum spanning tree (CLE) decoding:
+```
+./main.py --model models/model.json --use-ptb --decoder mst      # Test UAS 89.61
+./main.py --model models/model.json --use-ptb --decoder eisner   # Test UAS 90.15
+```
+English has few non-projective edges: Eisner makes quite a difference!
+
 ## Interpretation
 Fun fact one: the trained weights of the features are extremely interpretable. Here are the largest ones (from the simple feature-set):
 ```
