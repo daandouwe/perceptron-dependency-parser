@@ -103,7 +103,9 @@ def train(args):
     print(f'Number of pruned weights: {len(model.weights):,}.')
 
     print(f'Saving model to `{args.model}`...')
-    model.save(args.model, accuracy=dict(dev=round(dev_acc, 2)))
+    data_path = os.path.join(data_dir, UD_LANG[args.lang]) if not args.use_ptb else args.data
+    model.save(
+        args.model, data=data_path, epochs=args.epochs, accuracy=dict(dev=round(dev_acc, 2)))
 
     print()
     print('Producing predictions in conll format and final evaluation...')
@@ -138,7 +140,6 @@ if __name__ == '__main__':
     parser.add_argument('--load', action='store_true',
                         help='load a pretrained model, specify which with --model')
 
-
     # Training args.
     parser.add_argument('--epochs', type=int, default=10,
                         help='epochs to train')
@@ -164,6 +165,8 @@ if __name__ == '__main__':
                         help='parse some lines from the jabberwocky poem')
     parser.add_argument('--no-tags', action='store_true',
                         help='parse with no tags')
+    parser.add_argument('--plot-dir', default='image',
+                        help='dir for the heatmap plot')
     parser.add_argument('--plot-name', default='input',
                         help='name for the heatmap plot')
     parser.add_argument('--ext', default='pdf')

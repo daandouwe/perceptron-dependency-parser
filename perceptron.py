@@ -48,11 +48,13 @@ class Perceptron:
         self.sort()
         return list(self.weights.items())[:n]
 
-    def save(self, path, accuracy=None):
+    def save(self, path, data=None, epochs=None, accuracy=None):
         """Save model features and weights in json format."""
         path = path + '.json' if not path.endswith('.json') else path
         self.sort()
         model = {
+            'data': data,
+            'epochs': epochs,
             'accuracy': accuracy,
             'feature-opts': self.feature_opts,
             'weights': self.weights}
