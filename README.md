@@ -28,28 +28,28 @@ You can also use the PTB. We assume you have the PTB in standard train/dev/test 
 
 ## Usage
 To train the perceptron for 5 epochs on the English UD dataset, type:
-```
+```bash
 ./main.py train --epochs 5
 ```
 The training can be halted at any point with `cntrl-c`. The trained weights are saved as a json file at `models/model.json` by default. To specify this path use `--model path/to/model`.
 
 To use another language, e.g. Dutch, type:
-```
+```bash
 ./main.py train --lang nl --epochs 5
 ```
 
 By default the UD dataset is used. If you want to use the PTB, type:
-```
+```bash
 ./main.py train --use-ptb --ptb-dir your/ptb/dir
 ```
 
 To evaluate the trained perceptron on the development and test set, type:
-```
+```bash
 ./main.py eval --model path/to/model
 ```
 
 To plot heatmaps of the predicted score matrices for five sentences in the development set (like those in [image](image)) type:
-```
+```bash
 ./main.py plot --model path/to/model
 ```
 
@@ -57,7 +57,7 @@ To plot heatmaps of the predicted score matrices for five sentences in the devel
 Training can now be done in parallel. To be precise: asynchronous and lock-free, also known as [Hogwild!](https://arxiv.org/pdf/1106.5730.pdf) because without locks, processors might block each other wile rewriting memory (like a herd of wild hogs stepping on each others trotters). Since our optimization problem is sparse, meaning that most updates only modify a small number of the total parameters, this does not affect the quality of the learning algorithm.
 
 Just add one flag:
-```
+```bash
 ./main.py train --parallel
 ```
 By default we use all the available processors, so expect some venting.
@@ -98,7 +98,7 @@ With `(2 1)` indicating respectively the distance from head to between, and from
 
 ### Usage
 To choose these additional features for the model, type:
-```
+```bash
 ./main.py train --features dist surround between
 ```
 (Or any combination from these three.)
@@ -121,11 +121,11 @@ Averaging the weights makes quite a difference on the dev-set: from 86.87 to 89.
 
 ### Decoding: minimum spanning tree vs Eisner
 Let's see the difference in accuracy between Eisner's algorithm and the maximum spanning tree (CLE) decoding:
+```bash
+./main.py eval --model models/model.json --use-ptb --decoder mst      # Test UAS 89.61
+./main.py eval --model models/model.json --use-ptb --decoder eisner   # Test UAS 90.15
 ```
-./main.py --model models/model.json --use-ptb --decoder mst      # Test UAS 89.61
-./main.py --model models/model.json --use-ptb --decoder eisner   # Test UAS 90.15
-```
-English has few non-projective edges: Eisner makes quite a difference!
+English has few relatively few [non-projective](http://languagelog.ldc.upenn.edu/nll/?p=7851) sentences, and yes, Eisner decoding makes some difference accordingly!
 
 ## Interpretation
 Fun fact one: the trained weights of the features are extremely interpretable. Here are the largest ones (from the simple feature-set):
