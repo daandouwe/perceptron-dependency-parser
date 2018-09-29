@@ -69,7 +69,7 @@ head dep pos pos=VBN VBZ
 head dep word word=is a
 head dep pos word=VBN have
 head dep suffix suffix=ing is
-head dep shape shape=Xxxx dd/dd/ddd
+head dep shape shape=Xxxx dd/dd/dddd
 head dep shape shape=xxxx xx
 ```
 With shape inspired by spaCy's `token.shape` feature. This feature-set has no positional, context or otherwise sentence-level features.
